@@ -20,7 +20,6 @@
         <b-icon icon="person"></b-icon>
         Sign In</b-button>
       {{getAccount}}
-      <b-button @click="doTest" >test</b-button>
     </b-form>
   </b-col>
 </template>
@@ -43,7 +42,7 @@ name: "SignIn",
     ...mapGetters('account', ['getErrorMessage', 'getAccount'])
   },
   methods:{
-    ...mapActions('account', ['signIn', 'test']),
+    ...mapActions('account', ['signIn']),
 
     async doSignIn(){
       //let formData = new FormData();
@@ -57,9 +56,6 @@ name: "SignIn",
       }
     },
 
-    async doTest(){
-      await this.test();
-    }
   }
 }
 </script>

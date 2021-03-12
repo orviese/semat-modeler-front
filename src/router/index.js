@@ -5,6 +5,8 @@ import Register from "@/views/Register";
 import SignIn from "@/views/SignIn";
 import Profile from "@/views/Profile";
 import Dashboard from "@/views/Dashboard";
+import NotFound from "@/views/NotFound";
+import store from "../store";
 
 Vue.use(VueRouter)
 
@@ -13,41 +15,57 @@ const routes = [
     path: '/',
     name: 'Home',
     component: Home,
+    meta: {secure: false},
     children: [
       {
         path: '/profile',
         name: 'Profile',
-        component: Profile
+        component: Profile,
+        meta: {secure: true}
       },
       {
         path: '/signup',
         name: 'SignUp',
-        component: Register
+        component: Register,
+        meta: {secure: false}
       },
       {
         path: '/signin',
-        name: 'SingIn',
-        component: SignIn
+        name: 'SignIn',
+        component: SignIn,
+        meta: {secure: false}
       },
       {
         path: '/dashboard',
         name: 'Dashboard',
-        component: Dashboard
+        component: Dashboard,
+        meta: {secure: true}
       }
     ]
   },
   {
-    path: '/about',
-    name: 'About',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
+    path: '/:pathMatch(.*)',
+    name: 'NotFound',
+    component: NotFound
   }
 ]
 
 const router = new VueRouter({
   routes
 })
+
+router.beforeEach((to, from, next)=>{
+
+  const isLogged = store().state.account.isLogged;
+
+  if (to.matched.some(value => value.meta.secure) && isLogged){
+    next();
+  }else if(to.name !== 'SignIn' ){
+    next('/signin');
+  }else {
+    next(); //review a redundant warning
+  }
+
+});
 
 export default router

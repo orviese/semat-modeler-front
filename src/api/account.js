@@ -23,7 +23,9 @@ export default {
         return this.execute('post', '/account/signin', data,{});
     },
     updateProfile(data){
-        return this.execute('patch', '/account', data,
-            {withCredentials: true})
+        return this.execute('patch', '/account', data, {})
+    },
+    signOut() {
+        return this.execute('post', '/account/signout', {}, {});
     }
 }

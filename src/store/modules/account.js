@@ -48,6 +48,7 @@ const actions = {
             console.log(`trying to sign in... ${data.email}`);
             let response = await accountService.signIn(data);
             commit('setAccount', response.data);
+            commit('setLoggedIn', true);
             commit('clearErrorMessage');
             console.log(response.headers);
             console.log(response.data);
@@ -69,6 +70,12 @@ const actions = {
             commit('setErrorMessage', 'problems when updating profile...');
         }
 
+    },
+    async signOut({commit}){
+        await accountService.signOut();
+        commit('setLoggedIn', false);
+        await router.push('/signin');
+
     }
 }
 
@@ -85,6 +92,15 @@ const mutations = {
         state.account.name = payload.name;
         state.account.email = payload.email;
         state.account.status = payload.status;
+    },
+    setLoggedIn(state, payload){
+        state.isLogged = payload;
+        if (!payload){
+            state.account.id = '';
+            state.account.name = '';
+            state.account.email = '';
+            state.account.status = '';
+        }
     }
 }
 
