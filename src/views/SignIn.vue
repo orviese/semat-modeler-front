@@ -1,7 +1,6 @@
 <template>
   <b-col class="mt-5" md="6" sm="8" offset-md="3" offset-sm="2">
     <b-form @submit.prevent="doSignIn">
-
       <b-form-group id="myEmail" label-for="yemail" label="Email">
         <b-form-input id="yemail" required type="email" placeholder="john.doe@mail.com"
                       v-model="form.email">
@@ -43,11 +42,7 @@ name: "SignIn",
   },
   methods:{
     ...mapActions('account', ['signIn']),
-
     async doSignIn(){
-      //let formData = new FormData();
-      //formData.append('email', this.form.email);
-      //formData.append('password', this.form.password);
       await this.signIn(this.form);
       if (this.getErrorMessage !== ''){
         this.showAlert = true;
@@ -55,7 +50,6 @@ name: "SignIn",
         this.showAlert = false;
       }
     },
-
   }
 }
 </script>

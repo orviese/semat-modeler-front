@@ -1,8 +1,7 @@
 import axios from "axios";
 
 const client = axios.create({
-    baseURL: (process.env.NODE_ENV === 'prod' ? ''
-        : 'http://localhost:3000'),
+    baseURL: process.env.VUE_APP_SEMAT_API_ENDPOINT,
     json: true,
     withCredentials: true
 });

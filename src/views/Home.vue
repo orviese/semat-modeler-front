@@ -3,7 +3,7 @@
     <div class="my-container">
       <b-row>
         <b-col>
-          <b-navbar toggleable="lg" type="dark" variant="info" sticky>
+          <b-navbar toggleable="lg" type="dark" variant="dark" sticky>
             <b-navbar-brand to="/">SEMAT Modeler</b-navbar-brand>
             <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
             <b-collapse id="nav-collapse" is-nav>
@@ -28,7 +28,7 @@
         </b-col>
       </b-row>
       <b-row>
-        <b-col>
+        <b-col class="mt-5">
           <router-view></router-view>
         </b-col>
       </b-row>

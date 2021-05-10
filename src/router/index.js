@@ -7,6 +7,8 @@ import Profile from "@/views/Profile";
 import Dashboard from "@/views/Dashboard";
 import NotFound from "@/views/NotFound";
 import store from "../store";
+import HelloWorld from "@/components/HelloWorld";
+import About from "@/views/About";
 
 Vue.use(VueRouter)
 
@@ -39,7 +41,19 @@ const routes = [
         path: '/dashboard',
         name: 'Dashboard',
         component: Dashboard,
-        meta: {secure: true}
+        meta: {secure: true},
+        children: [
+          {
+            path: '/hello',
+            name: 'Hello',
+            component: HelloWorld,
+          },
+          {
+            path: '/about',
+            name: 'About',
+            component: About,
+          }
+        ]
       }
     ]
   },
@@ -55,17 +69,14 @@ const router = new VueRouter({
 })
 
 router.beforeEach((to, from, next)=>{
-
   const isLogged = store().state.account.isLogged;
-
   if (to.matched.some(value => value.meta.secure) && isLogged){
     next();
-  }else if(to.name !== 'SignIn' ){
+  }else if(to.name !== 'SignIn' && to.name !== 'SignUp'){
     next('/signin');
   }else {
     next(); //review a redundant warning
   }
-
 });
 
 export default router
