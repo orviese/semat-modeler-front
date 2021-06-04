@@ -3,9 +3,7 @@
       <div class="dashboard-container">
         <router-view></router-view>
       </div>
-      <sidebar-menu class="mt-5" :menu="menu"
-                    :theme="theme" width="250px"
-          @toggle-collapse="onToggleCollapse">
+      <sidebar-menu class="mt-5" :menu="menu" :theme="theme" width="250px" @toggle-collapse="onToggleCollapse">
         <template #toggle-icon>
           <i class="fas fa-bars"></i>
         </template>
@@ -29,18 +27,38 @@ export default {
           href: '/profile',
           title: 'Dashboard',
           icon: 'fa fa-user'
+        },{
+          title: 'Kernel',
+          icon: 'fa fa-cog',
+          child: [
+            {
+              href: '/areas-of-concern',
+              title: 'Areas Of Concern',
+              icon: 'fa fa-graduation-cap'
+            },
+            {
+              href: '',
+              title: 'Alphas',
+              icon: 'fa fa-spinner'
+            },
+            {
+              href: '',
+              title: 'Activity Spaces',
+              icon: 'fa fa-bars'
+            }
+          ]
         },
         {
-          title: 'Charts',
-          icon: 'fa fa-chart-area',
+          title: 'Practices',
+          icon: 'fa fa-object-group',
           child: [
             {
               href: '/hello',
-              title: 'Alphas'
+              title: 'Build'
             },
             {
               href: '/about',
-              title: 'Activities'
+              title: 'Validate'
             }
           ]
         }

@@ -9,6 +9,7 @@ import NotFound from "@/views/NotFound";
 import store from "../store";
 import HelloWorld from "@/components/HelloWorld";
 import About from "@/views/About";
+import AreaOfConcernView from "@/views/AreaOfConcernView";
 
 Vue.use(VueRouter)
 
@@ -52,6 +53,11 @@ const routes = [
             path: '/about',
             name: 'About',
             component: About,
+          },
+          {
+            path: '/areas-of-concern',
+            name: 'AreaOfConcern',
+            component: AreaOfConcernView
           }
         ]
       }

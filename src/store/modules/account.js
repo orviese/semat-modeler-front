@@ -36,8 +36,8 @@ const actions = {
             await router.push('/signin');
         }catch (e){
             if (e.response !== null){
-                //console.log(e.response.data.response);
-                commit('setErrorMessage', e.response.data.response.message)
+                console.log(e.response.data.errors);
+                commit('setErrorMessage', e.response.data.errors[0]);
             }else {
                 commit('setErrorMessage', 'problems when registering...')
             }
