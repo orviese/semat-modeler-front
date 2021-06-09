@@ -1,4 +1,8 @@
 <template>
+  <b-container>
+    <h2>Dashboard</h2>
+  </b-container>
+  <!--
     <b-col id="dashboard-parent" :class="[{'collapsed' : collapse}]">
       <div class="dashboard-container">
         <router-view></router-view>
@@ -8,7 +12,7 @@
           <i class="fas fa-bars"></i>
         </template>
       </sidebar-menu>
-    </b-col>
+    </b-col> -->
 </template>
 
 <script>
@@ -20,14 +24,15 @@ export default {
       menu: [
         {
           header: true,
-          title: 'Menu navigation',
+          title: 'SEMOVA',
           hiddenOnCollapse: true
         },
         {
           href: '/profile',
           title: 'Dashboard',
           icon: 'fa fa-user'
-        },{
+        },
+        {
           title: 'Kernel',
           icon: 'fa fa-cog',
           child: [

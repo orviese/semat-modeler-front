@@ -5,8 +5,4 @@
 </template>
 
 <style>
-  .my-footer{
-    bottom: 0;
-    position: absolute;
-  }
 </style>

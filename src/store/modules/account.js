@@ -50,8 +50,8 @@ const actions = {
             commit('setAccount', response.data);
             commit('setLoggedIn', true);
             commit('clearErrorMessage');
-            console.log(response.headers);
-            console.log(response.data);
+            //console.log(response.headers);
+            //console.log(response.data);
             await router.push('/dashboard');
         }catch (e) {
             if (e.response !== null){

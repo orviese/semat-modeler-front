@@ -1,15 +1,15 @@
-import Vue from 'vue'
-import VueRouter from 'vue-router'
-import Home from '../views/Home.vue'
+import Vue from 'vue';
+import VueRouter from 'vue-router';
 import Register from "@/views/Register";
 import SignIn from "@/views/SignIn";
 import Profile from "@/views/Profile";
 import Dashboard from "@/views/Dashboard";
 import NotFound from "@/views/NotFound";
 import store from "../store";
-import HelloWorld from "@/components/HelloWorld";
-import About from "@/views/About";
+
 import AreaOfConcernView from "@/views/AreaOfConcernView";
+import NewHome from "@/views/NewHome";
+import AlphaView from "@/views/AlphaView";
 
 Vue.use(VueRouter)
 
@@ -17,7 +17,7 @@ const routes = [
   {
     path: '/',
     name: 'Home',
-    component: Home,
+    component: NewHome,
     meta: {secure: false},
     children: [
       {
@@ -39,6 +39,24 @@ const routes = [
         meta: {secure: false}
       },
       {
+        path: '/areas-of-concern',
+        name: 'AreaOfConcern',
+        component: AreaOfConcernView,
+        meta: {secure: true}
+      },
+      {
+        path: '/dashboard',
+        name: 'Dashboard',
+        component: Dashboard,
+        meta: {secure: true},
+      },
+      {
+        path: '/alphas',
+        name: 'Alpha',
+        component: AlphaView,
+        meta: {secure: true},
+      }
+      /*,{
         path: '/dashboard',
         name: 'Dashboard',
         component: Dashboard,
@@ -60,7 +78,7 @@ const routes = [
             component: AreaOfConcernView
           }
         ]
-      }
+      }*/
     ]
   },
   {
@@ -76,6 +94,7 @@ const router = new VueRouter({
 
 router.beforeEach((to, from, next)=>{
   const isLogged = store().state.account.isLogged;
+  //console.log(to);
   if (to.matched.some(value => value.meta.secure) && isLogged){
     next();
   }else if(to.name !== 'SignIn' && to.name !== 'SignUp'){

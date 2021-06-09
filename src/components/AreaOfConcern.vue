@@ -40,7 +40,7 @@ export default {
       this.areaOfConcern.id = '';
       this.areaOfConcern.name = '';
       this.areaOfConcern.description = '';
-      this.areaOfConcern.color = '#F9FFC0';
+      this.areaOfConcern.color = '#c7d458';
     }
   }
 }
