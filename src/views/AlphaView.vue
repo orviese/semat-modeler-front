@@ -1,8 +1,8 @@
 <template>
-<b-container>
-  <h2>Alpha</h2>
+<div>
+  <h2 class="ml-3">Alpha</h2>
   <Alpha></Alpha>
-</b-container>
+</div>
 </template>
 
 <script>

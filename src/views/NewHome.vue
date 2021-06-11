@@ -1,16 +1,14 @@
 <template>
-  <b-container>
-    <div id="dashboard-parent" :class="[{'collapsed' : collapse}]">
-      <div class="mt-5">
-        <router-view></router-view>
-      </div>
-      <sidebar-menu :menu="menuToShow" :width="width" @toggle-collapse="onToggleCollapse" @item-click="onItemClick">
-        <template #toggle-icon>
-          <i class="fas fa-bars"></i>
-        </template>
-      </sidebar-menu>
+  <div id="dashboard-parent" :class="[{'collapsed' : collapse}]">
+    <div class="mt-5">
+      <router-view></router-view>
     </div>
-  </b-container>
+    <sidebar-menu :menu="menuToShow" :width="width" @toggle-collapse="onToggleCollapse" @item-click="onItemClick">
+      <template #toggle-icon>
+        <i class="fas fa-bars"></i>
+      </template>
+    </sidebar-menu>
+  </div>
 </template>
 
 <script>
@@ -47,11 +45,13 @@ export default {
         {
           href: '/dashboard',
           title: 'Dashboard',
-          icon: 'fa fa-user'
+          icon: 'fa fa-archive',
+          hidden: !this.isLogged
         },
         {
           title: 'Kernel',
           icon: 'fa fa-cog',
+          hidden: !this.isLogged,
           child: [
             {
               href: '/areas-of-concern',
@@ -64,42 +64,56 @@ export default {
               icon: 'fa fa-spinner'
             },
             {
-              href: '',
+              href: '/activity-spaces',
               title: 'Activity Spaces',
               icon: 'fa fa-bars'
+            },
+            {
+              href: '/competencies',
+              title: 'Competencies',
+              icon: 'fa fa-star'
             }
           ]
         },
         {
           title: 'Practices',
           icon: 'fa fa-object-group',
+          hidden: !this.isLogged,
           child: [
             {
-              href: '/hello',
-              title: 'Build'
+              href: '/model-practices',
+              title: 'Model',
+              icon: 'fa fa-terminal'
             },
             {
               href: '/about',
-              title: 'Validate'
+              title: 'Validate',
+              icon: 'fa fa-check-square'
             }
           ]
         },
         {
-          href: '/profile',
-          title: 'Profile',
-          icon: 'fa fa-user',
-          hidden: !this.isLogged
-        },
-        {
-          href: '/sigin',
-          title: 'Login',
-          icon: 'fa fa-user',
-          hidden: this.isLogged
-        },
-        {
-          title: 'Logout',
-          icon: 'fa fa-user',
-          hidden: !this.isLogged
+          title: 'Account',
+          icon: 'fa fa-user-circle',
+          child: [
+            {
+              href: '/profile',
+              title: 'Profile',
+              icon: 'fa fa-pencil',
+              hidden: !this.isLogged
+            },
+            {
+              href: '/sigin',
+              title: 'Login',
+              icon: 'fa fa-key',
+              hidden: this.isLogged
+            },
+            {
+              title: 'Logout',
+              icon: 'fa fa-sign-out',
+              hidden: !this.isLogged
+            }
+          ]
         }
       ];
     }
@@ -109,12 +123,11 @@ export default {
 
 <style scoped>
 #dashboard-parent {
-  padding-left: 280px;
+  padding-left: 255px;
   transition: 0.5s ease;
 }
 
 #dashboard-parent.collapsed {
-  padding-left: 30px;
+  padding-left: 50px;
 }
-
 </style>

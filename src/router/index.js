@@ -10,6 +10,8 @@ import store from "../store";
 import AreaOfConcernView from "@/views/AreaOfConcernView";
 import NewHome from "@/views/NewHome";
 import AlphaView from "@/views/AlphaView";
+import ActivitySpaceView from "@/views/ActivitySpaceView";
+import ModelPractice from "@/views/ModelPractice";
 
 Vue.use(VueRouter)
 
@@ -54,6 +56,18 @@ const routes = [
         path: '/alphas',
         name: 'Alpha',
         component: AlphaView,
+        meta: {secure: true},
+      },
+      {
+        path: '/activity-spaces',
+        name: 'ActivitySpaces',
+        component: ActivitySpaceView,
+        meta: {secure: true},
+      },
+      {
+        path: '/model-practices',
+        name: 'ModelPractices',
+        component: ModelPractice,
         meta: {secure: true},
       }
       /*,{

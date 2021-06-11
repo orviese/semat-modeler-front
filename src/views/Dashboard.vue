@@ -1,6 +1,6 @@
 <template>
   <b-container>
-    <h2>Dashboard</h2>
+    <h2>Available Practices</h2>
   </b-container>
   <!--
     <b-col id="dashboard-parent" :class="[{'collapsed' : collapse}]">
@@ -72,7 +72,6 @@ export default {
       width: '250px',
       relative: true,
       collapse: false
-
     }
   },
   methods: {
@@ -84,15 +83,11 @@ export default {
 </script>
 
 <style scoped>
-
-
 #dashboard-parent {
   padding-left: 255px;
   transition: 0.3s ease;
 }
-
 #dashboard-parent.collapsed {
   padding-left: 55px;
 }
-
 </style>
