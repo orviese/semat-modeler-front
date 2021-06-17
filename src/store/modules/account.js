@@ -2,7 +2,15 @@ import accountService from "@/api/account";
 import router from "@/router";
 
 const state = ()=>({
-    account:{
+    account: {
+        id: '',
+        name: '',
+        email: '',
+        password: '',
+        newPassword: '',
+        status: ''
+    },
+    accountDefault: {
         id: '',
         name: '',
         email: '',
@@ -74,6 +82,7 @@ const actions = {
     async signOut({commit}){
         await accountService.signOut();
         commit('setLoggedIn', false);
+        //commit('clearState', rootState);
         await router.push('/signin');
 
     }
@@ -88,20 +97,27 @@ const mutations = {
         state.errorMessage = payload;
     },
     setAccount(state, payload) {
-        state.account.id = payload.id;
-        state.account.name = payload.name;
-        state.account.email = payload.email;
-        state.account.status = payload.status;
+        state.account = payload;
     },
     setLoggedIn(state, payload){
         state.isLogged = payload;
         if (!payload){
-            state.account.id = '';
-            state.account.name = '';
-            state.account.email = '';
-            state.account.status = '';
+            this.replaceState({
+                account: {
+                    account: state.accountDefault,
+                    isLogged: false
+                },
+                practice: {
+                    practice: {
+                        id: '',
+                        name: '',
+                        objective: ''
+                    }
+                }
+            });
         }
-    }
+    },
+
 }
 
 export default {

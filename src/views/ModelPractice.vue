@@ -1,16 +1,26 @@
 <template>
   <div class="container">
-    <h3 class="text-center">
-      <span class="border border-warning  p-3">Model a Practice</span>
-    </h3>
-
+      <h3 class="text-center mb-4">
+        <span class="border border-warning  p-3">Model a Practice</span>
+      </h3>
     <b-row>
       <b-col>
         <b-form class="mb-5">
-          <b-form-group label="Practice Name" label-class="font-weight-bold" class="color-font">
-            <b-form-input></b-form-input>
+          <b-form-group  label-cols="2" label="Practice Name" label-class="font-weight-bold" class="color-font">
+            <b-form-input v-model="practice.name" placeholder="Software development practice"></b-form-input>
           </b-form-group>
-          <b-form-group class="border border-info p-2" label="Alphas" label-class="font-weight-bold"
+          <b-form-group label="Objective" label-class="font-weight-bold"
+                        description="The objective of this Practice, expressed as a concise and isolated phrase. The content of this attribute should be an explicit and short statement that describes the goal that the practice pursues.">
+            <b-form-textarea rows="3" v-model="practice.objective"></b-form-textarea>
+          </b-form-group>
+          <b-form-group>
+            <b-button @click="onSavePractice" variant="info">Save</b-button>
+            <!--
+            <b-button class="ml-3" type="reset" variant="outline-dark">Clear</b-button>
+            -->
+          </b-form-group>
+          <div><p>{{getPractice}}</p></div>
+          <b-form-group class="shadow p-3 mb-5 bg-white rounded border border-info p-2" label="Alphas" label-class="font-weight-bold"
                         description="Things to work with">
             <b-input-group>
               <b-form-select v-model="alphaSelected" :options="alphas" text-field="name" value-field="id">
@@ -47,9 +57,9 @@
           </b-form-group>
 
           <b-form-group
-              class="border border-info p-2"
+              class="shadow p-3 mb-5 bg-white rounded border border-info p-2"
               label="Work products"
-              description="Activity results"
+              description="Activity result that describes an alpha"
               label-class="font-weight-bold">
             <b-form-group label="Work Product" label-cols="3">
               <b-input-group>
@@ -86,7 +96,7 @@
             </b-form-group>
           </b-form-group>
 
-          <b-form-group class="border border-info p-2"
+          <b-form-group class="shadow p-3 mb-5 bg-white rounded border border-info p-2"
                         label="Work products manifest"
                         label-align="left"
                         label-class="font-weight-bold"
@@ -166,14 +176,19 @@
               </b-table-simple>
             </b-form-group>
           </b-form-group>
-          <b-form-group label="Activity Spaces" label-class="font-weight-bold" class="border border-info p-2">
+          <b-form-group description="Available activity spaces" label="Activity Spaces" label-class="font-weight-bold"
+                        class="shadow p-3 mb-5 bg-white rounded border border-info p-2">
               <b-input-group>
-                <b-form-select v-model="workProduct" :options="workProducts">
+                <b-form-select
+                    value-field="id"
+                    text-field="name"
+                    v-model="activitySpaceSelected" :options="activitySpaces">
                 </b-form-select>
                 <b-input-group-append class="ml-2">
                   <b-button variant="info">Add</b-button>
                 </b-input-group-append>
               </b-input-group>
+            <p class="text-center text-black-50 bg-warning mt-3">Available activity spaces</p>
             <b-table-simple small striped hover outlined  class="mt-3">
               <b-thead head-variant="dark">
                 <b-tr>
@@ -196,8 +211,11 @@
               </b-tbody>
             </b-table-simple>
             <b-form-group label="Activities"  label-class="font-weight-bold"  description="Things to do">
-              <b-form-group label="Activity Space">
-                <b-form-select v-model="workProduct" :options="workProducts"></b-form-select>
+              <b-form-group label="Activity Space that organize the activity">
+                <b-form-select
+                    value-field="id"
+                    text-field="name"
+                    v-model="activitySpaceSelected" :options="activitySpaces"></b-form-select>
               </b-form-group>
               <b-form-group label="Activity">
                 <b-input-group>
@@ -226,11 +244,9 @@
                 </b-tbody>
               </b-table-simple>
             </b-form-group>
-            <b-form-group label="Work product manifest"></b-form-group>
 
           </b-form-group>
-          <b-button variant="outline-secondary">Create</b-button>
-          <b-button class="ml-3" type="reset" variant="outline-dark">Clear</b-button>
+
         </b-form>
       </b-col>
     </b-row>
@@ -238,10 +254,16 @@
 </template>
 
 <script>
+import {mapActions, mapGetters} from 'vuex'
 export default {
   name: "ModelPractice",
   data() {
     return {
+      practice: {
+        id: '',
+        name: '',
+        objective: ''
+      },
       options: [
         {value: {id: '1', value: 'Apple'}},
         {value: {id: '2', value: 'Orange'}},
@@ -258,13 +280,37 @@ export default {
         {id: '1', name: 'requirements'},
         {id: '1', name: 'work'},
       ],
-      alphasSelected: []
+      alphasSelected: [],
+      activitySpaces: [
+        {id: '1', name: 'Explore possibilities', areaOfConcern:''},
+        {id: '2', name: 'Understand the requirements', areaOfConcern:''},
+        {id: '3', name: 'Test the system', areaOfConcern:''},
+        {id: '4', name: 'Coordinate activity', areaOfConcern:''},
+        {id: '5', name: 'Support the team', areaOfConcern:''},
+      ],
+      activitySpaceSelected: null
     }
   },
   computed: {
+    ...mapGetters('practice', ['getPractice', 'getErrorMessage']),
     availableOptions() {
       return this.options.filter(opt => this.value.indexOf(opt.value) === -1)
     }
+  },
+  methods: {
+    ...mapActions('practice', ['create', 'updatePractice']),
+    async onSavePractice() {
+      if (this.practice.id === '') {
+        await this.create(this.practice);
+      } else {
+        await this.updatePractice(this.practice)
+      }
+    }
+  },
+  mounted() {
+    this.practice.id = this.getPractice.id;
+    this.practice.name = this.getPractice.name;
+    this.practice.objective = this.getPractice.objective;
   }
 }
 </script>
