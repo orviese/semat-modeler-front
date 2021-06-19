@@ -1,11 +1,8 @@
 <template>
   <div class="container">
-      <h3 class="text-center mb-4">
-        <span class="border border-warning  p-3">Model a Practice</span>
-      </h3>
-    <b-row>
-      <b-col>
-        <b-form class="mb-5">
+    <b-tabs class="mb-5" v-model="tabIndex">
+      <b-tab title="Practice definition" :title-link-class="linkTabClass(0)">
+        <b-form class="mt-3">
           <b-form-group  label-cols="2" label="Practice Name" label-class="font-weight-bold" class="color-font">
             <b-form-input v-model="practice.name" placeholder="Software development practice"></b-form-input>
           </b-form-group>
@@ -13,6 +10,53 @@
                         description="The objective of this Practice, expressed as a concise and isolated phrase. The content of this attribute should be an explicit and short statement that describes the goal that the practice pursues.">
             <b-form-textarea rows="3" v-model="practice.objective"></b-form-textarea>
           </b-form-group>
+          <b-form-group label="Tags" label-class="font-weight-bold"
+                        description="Enter desired tags separated by comma ','">
+            <b-form-tags
+                input-id="tags" tag-pills size="md" tag-variant="success" separator=","
+                v-model="practice.tags" placeholder="">
+            </b-form-tags>
+          </b-form-group>
+          <b-form-group label="Resources" label-class="font-weight-bold"
+                        description="Enter desired tags separated by comma ','">
+            <b-form-tags
+                input-id="tags" tag-pills size="md" tag-variant="success" separator=","
+                 v-model="practice.tags" placeholder="">
+            </b-form-tags>
+          </b-form-group>
+
+          <b-form-group label="Properties" label-class="font-weight-bold"
+                        description="Enter desired properties separated by comma ','">
+            <b-form-tags
+                input-id="tags" tag-pills size="md" tag-variant="warning" separator=","
+                v-model="practice.tags" placeholder="">
+            </b-form-tags>
+          </b-form-group>
+
+          <b-form-group label="Measures" label-class="font-weight-bold"
+                        description="Enter desired tags separated by comma ','">
+            <b-form-tags
+                input-id="tags" tag-pills size="md" tag-variant="dark" separator=","
+                v-model="practice.tags" placeholder="">
+            </b-form-tags>
+          </b-form-group>
+
+          <b-form-group label="Entries" label-class="font-weight-bold"
+                        description="Enter desired tags separated by comma ','">
+            <b-form-tags
+                input-id="tags" tag-pills size="md" tag-variant="dark" separator=","
+                v-model="practice.tags" placeholder="">
+            </b-form-tags>
+          </b-form-group>
+
+          <b-form-group label="Results" label-class="font-weight-bold"
+                        description="Enter desired tags separated by comma ','">
+            <b-form-tags
+                input-id="tags" tag-pills size="md" tag-variant="success" separator=","
+                 v-model="practice.tags" placeholder="">
+            </b-form-tags>
+          </b-form-group>
+
           <b-form-group>
             <b-button @click="onSavePractice" variant="info">Save</b-button>
             <!--
@@ -20,6 +64,21 @@
             -->
           </b-form-group>
           <div><p>{{getPractice}}</p></div>
+
+        </b-form>
+      </b-tab>
+      <b-tab title="Alphas" :title-link-class="linkTabClass(1)">
+
+      </b-tab>
+      <b-tab title="Work products" :title-link-class="linkTabClass(2)">
+
+      </b-tab>
+    </b-tabs>
+
+    <b-row>
+      <b-col>
+        <b-form class="mb-5">
+
           <b-form-group class="shadow p-3 mb-5 bg-white rounded border border-info p-2" label="Alphas" label-class="font-weight-bold"
                         description="Things to work with">
             <b-input-group>
@@ -259,10 +318,17 @@ export default {
   name: "ModelPractice",
   data() {
     return {
+      tabIndex: 0,
       practice: {
         id: '',
         name: '',
-        objective: ''
+        objective: '',
+        tags: [],
+        resources: [],
+        properties: [],
+        measure: [],
+        entry: [],
+        result: []
       },
       options: [
         {value: {id: '1', value: 'Apple'}},
@@ -305,6 +371,13 @@ export default {
       } else {
         await this.updatePractice(this.practice)
       }
+    },
+    linkTabClass(index) {
+      if (this.tabIndex === index) {
+        return ['bg-warning', 'text-white', 'font-weight-bold']
+      } else {
+        return ['bg-light', 'text-secondary']
+      }
     }
   },
   mounted() {
@@ -317,7 +390,8 @@ export default {
 
 <style scoped>
 .color-font {
-  color: darkgoldenrod;
+  color: black;
+  font-weight: bold;
   /*background-color: darkgoldenrod;*/
 }
 </style>
