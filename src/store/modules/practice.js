@@ -2,20 +2,35 @@ import practiceService from "@/api/practices";
 import router from "@/router";
 
 const state = () => ({
+    practices: [],
     practice: {
         id: '',
         name: '',
-        objective: ''
+        objective: '',
+        tags: []
     },
-    errorMessage: ''
+    defaultPractice: {
+        _id: '',
+        name: '',
+        objective: '',
+        tags: []
+    },
+    errorMessage: '',
+    infoMessage: ''
 });
 
 const getters = {
     getPractice(state) {
         return state.practice;
     },
+    getPractices(state) {
+        return state.practices;
+    },
     getErrorMessage(state) {
         return state.errorMessage;
+    },
+    getInfoMessage(state) {
+        return state.infoMessage;
     }
 }
 
@@ -26,7 +41,7 @@ const actions = {
             let practiceCreated = await practiceService.createPractice(practice);
             console.log(practiceCreated.data);
             commit('setPractice', practiceCreated.data);
-            commit('clearErrorMessage');
+            commit('setInfoMessage', 'Practice created.');
         } catch (e) {
             if (e.response !== null) {
                 if (e.response.status === 401) {
@@ -46,9 +61,25 @@ const actions = {
             let practiceUpdated = await practiceService.updatePractice(data);
             //console.log(practiceUpdated.data)
             commit('setPractice', practiceUpdated.data);
+            commit('setInfoMessage', 'Practice updated.');
         } catch (e) {
             commit('setErrorMessage', 'problems when updating practice...');
         }
+    },
+    async fetchAvailablePractices({commit}) {
+        try {
+            let practices = await practiceService.fetchAllPractices();
+            commit('setPractices', practices.data.practices);
+        }catch (e) {
+            commit('setErrorMessage', 'problems getting available practices...');
+        }
+    },
+    async setPracticeToEdit({commit}, data) {
+        commit('setPractice', data);
+        commit('setInfoMessage', 'Edit selected practice.')
+    },
+    defaultPractice({commit, state}) {
+        commit('setPractice', state.defaultPractice);
     }
 }
 
@@ -57,8 +88,16 @@ const mutations = {
     clearErrorMessage(state) {
         state.errorMessage = '';
     },
+    setInfoMessage(state, payload) {
+        state.infoMessage = payload;
+        state.errorMessage = '';
+    },
     setErrorMessage(state, payload) {
         state.errorMessage = payload;
+        state.infoMessage = '';
+    },
+    setPractices(state, payload) {
+        state.practices = payload;
     },
     setPractice(state, payload) {
         console.log('updating practice store', payload)
@@ -68,6 +107,7 @@ const mutations = {
         state.practice.id = payload._id;
         state.practice.name = payload.name;
         state.practice.objective = payload.objective;
+        state.practice.tags = payload.tags
     }
 }
 

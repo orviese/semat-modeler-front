@@ -1,27 +1,60 @@
 <template>
   <div class="container">
-    <b-tabs class="mb-5" v-model="tabIndex">
-      <b-tab title="Practice definition" :title-link-class="linkTabClass(0)">
+    <b-alert class="mt-3"
+        :show="dismissCountDown"
+        dismissible
+        :variant="getErrorMessage === '' ? 'success' : 'danger'"
+        @dismissed="dismissCountDown=0"
+        @dismiss-count-down="countDownChanged"
+    >
+      {{ alertMessage }}
+    </b-alert>
+    <b-tabs class="mb-5" v-model="tabIndex" lazy @activate-tab="onTabSelectionChange">
+      <b-tab title="Available Practices" :title-link-class="linkTabClass(0)" @click="onLoad">
+        <b-table-simple hover striped small bordered class="mt-3">
+          <b-thead head-variant="dark">
+            <b-th>Name</b-th>
+            <b-th>Objective</b-th>
+            <b-th>Tags</b-th>
+            <b-th></b-th>
+          </b-thead>
+          <b-tbody>
+            <b-tr v-for="practice in getPractices" :key="practice._id">
+              <b-td>{{practice.name}}</b-td>
+              <b-td>{{practice.objective}}</b-td>
+              <b-td>{{practice.tags}}</b-td>
+              <b-td><b-button variant="info" @click="onPracticeEdit(practice)">Edit</b-button></b-td>
+            </b-tr>
+          </b-tbody>
+        </b-table-simple>
+      </b-tab>
+      <b-tab title="Practice definition" :title-link-class="linkTabClass(1)">
         <b-form class="mt-3">
-          <b-form-group  label-cols="2" label="Practice Name" label-class="font-weight-bold" class="color-font">
-            <b-form-input v-model="practice.name" placeholder="Software development practice"></b-form-input>
+          <b-form-group>
+          </b-form-group>
+          <b-form-group>
+            <b-button size="lg" squared class="float-right" @click="onSavePractice" variant="success">Save</b-button>
+            <b-button squared size="lg" class="float-right mr-3" @click="onNewPractice">New</b-button>
+          </b-form-group>
+          <b-form-group label-cols="2" label="Practice Name" label-class="font-weight-bold" class="color-font">
+            <b-form-input v-model="getPractice.name" placeholder="Software development practice"></b-form-input>
           </b-form-group>
           <b-form-group label="Objective" label-class="font-weight-bold"
                         description="The objective of this Practice, expressed as a concise and isolated phrase. The content of this attribute should be an explicit and short statement that describes the goal that the practice pursues.">
-            <b-form-textarea rows="3" v-model="practice.objective"></b-form-textarea>
+            <b-form-textarea rows="3" v-model="getPractice.objective"></b-form-textarea>
           </b-form-group>
           <b-form-group label="Tags" label-class="font-weight-bold"
                         description="Enter desired tags separated by comma ','">
             <b-form-tags
                 input-id="tags" tag-pills size="md" tag-variant="success" separator=","
-                v-model="practice.tags" placeholder="">
+                v-model="getPractice.tags" placeholder="">
             </b-form-tags>
           </b-form-group>
           <b-form-group label="Resources" label-class="font-weight-bold"
                         description="Enter desired tags separated by comma ','">
             <b-form-tags
                 input-id="tags" tag-pills size="md" tag-variant="success" separator=","
-                 v-model="practice.tags" placeholder="">
+                v-model="getPractice.resources" placeholder="">
             </b-form-tags>
           </b-form-group>
 
@@ -29,7 +62,7 @@
                         description="Enter desired properties separated by comma ','">
             <b-form-tags
                 input-id="tags" tag-pills size="md" tag-variant="warning" separator=","
-                v-model="practice.tags" placeholder="">
+                v-model="getPractice.properties" placeholder="">
             </b-form-tags>
           </b-form-group>
 
@@ -37,7 +70,7 @@
                         description="Enter desired tags separated by comma ','">
             <b-form-tags
                 input-id="tags" tag-pills size="md" tag-variant="dark" separator=","
-                v-model="practice.tags" placeholder="">
+                v-model="getPractice.measures" placeholder="">
             </b-form-tags>
           </b-form-group>
 
@@ -53,24 +86,256 @@
                         description="Enter desired tags separated by comma ','">
             <b-form-tags
                 input-id="tags" tag-pills size="md" tag-variant="success" separator=","
-                 v-model="practice.tags" placeholder="">
+                v-model="practice.tags" placeholder="">
             </b-form-tags>
+          </b-form-group>
+          <div><p>{{ getPractice }}</p></div>
+        </b-form>
+      </b-tab>
+      <b-tab title="Alphas" :title-link-class="linkTabClass(2)">
+        <b-form-group class="shadow p-3 mb-5 bg-white rounded border border-info p-2" label="Alphas"
+                      label-class="font-weight-bold"
+                      description="Things to work with">
+          <b-input-group>
+            <b-form-select v-model="alphaSelected" :options="alphas" text-field="name" value-field="id">
+              <template #first>
+                <b-form-select-option :value="null" disabled>-- Please select an alpha --</b-form-select-option>
+              </template>
+            </b-form-select>
+            <b-input-group-append class="ml-2">
+              <b-button size="sm" variant="info">Add</b-button>
+              <b-button size="sm" variant="success" class="ml-2">New</b-button>
+            </b-input-group-append>
+          </b-input-group>
+          <b-table-simple small striped class="mt-3">
+            <b-thead>
+              <b-tr>
+                <b-th>Name</b-th>
+                <b-th>Area of concern</b-th>
+                <b-th></b-th>
+              </b-tr>
+            </b-thead>
+            <b-tbody>
+              <b-tr>
+                <b-td>Alpha</b-td>
+                <b-td></b-td>
+                <b-td></b-td>
+              </b-tr>
+              <b-tr>
+                <b-td>Alpha 123</b-td>
+                <b-td></b-td>
+                <b-td></b-td>
+              </b-tr>
+            </b-tbody>
+          </b-table-simple>
+        </b-form-group>
+      </b-tab>
+      <b-tab title="Work products" :title-link-class="linkTabClass(3)">
+        <b-form-group
+            class="shadow p-3 mb-5 bg-white rounded border border-info p-2"
+            label="Work products"
+            description="Activity result that describes an alpha"
+            label-class="font-weight-bold">
+          <b-form-group label="Work Product" label-cols="3">
+            <b-input-group>
+              <b-form-select v-model="workProduct" :options="workProducts">
+              </b-form-select>
+              <b-input-group-append class="ml-2">
+                <b-button size="sm" variant="info">Add</b-button>
+                <b-button size="sm" variant="success" class="ml-2">New</b-button>
+              </b-input-group-append>
+            </b-input-group>
+          </b-form-group>
+          <b-form-group>
+            <b-table-simple small striped hover class="mt-2">
+              <b-thead head-variant="dark">
+                <b-tr>
+                  <b-th>Work Product</b-th>
+                  <b-th>Description</b-th>
+                  <b-th></b-th>
+                </b-tr>
+              </b-thead>
+              <b-tbody>
+                <b-tr>
+                  <b-td>Test Case</b-td>
+                  <b-td></b-td>
+                  <b-td>
+                    <b-button variant="danger" size="sm">
+                      <b-icon-trash></b-icon-trash>
+                    </b-button>
+                  </b-td>
+                </b-tr>
+                <b-tr>
+                  <b-td>Test Case</b-td>
+                  <b-td></b-td>
+                  <b-td></b-td>
+                </b-tr>
+              </b-tbody>
+            </b-table-simple>
+          </b-form-group>
+        </b-form-group>
+      </b-tab>
+
+      <b-tab title="Work product manifest" :title-link-class="linkTabClass(4)">
+        <b-form-group class="shadow p-3 mb-5 bg-white rounded border border-info p-2"
+                      label="Work products manifest"
+                      label-align="left"
+                      label-class="font-weight-bold"
+                      description="Concrete work products representation to describe the alpha">
+          <b-form-group label="Lower Bound" label-cols="3">
+            <b-input></b-input>
+          </b-form-group>
+          <b-form-group label="Upper Bound" label-cols="3">
+            <b-input></b-input>
+          </b-form-group>
+          <b-form-group label="Alpha" label-cols="3"
+                        description="Alpha bound by this manifest">
+            <b-form-select v-model="workProduct" :options="workProducts">
+            </b-form-select>
+          </b-form-group>
+          <b-form-group label="Work Product" label-cols="3"
+                        description="Work product bound by this manifest">
+            <b-form-select v-model="workProduct" :options="workProducts">
+            </b-form-select>
+          </b-form-group>
+          <b-form-group>
+            <b-button variant="info">Add</b-button>
           </b-form-group>
 
           <b-form-group>
-            <b-button @click="onSavePractice" variant="info">Save</b-button>
-            <!--
-            <b-button class="ml-3" type="reset" variant="outline-dark">Clear</b-button>
-            -->
+            <b-table-simple small striped class="mt-2">
+              <b-thead>
+                <b-tr>
+                  <b-th>Alpha</b-th>
+                  <b-th>Work Product</b-th>
+                  <b-th>Lower Bound</b-th>
+                  <b-th>Upper Bound</b-th>
+                  <b-th></b-th>
+                </b-tr>
+              </b-thead>
+              <b-tbody>
+                <b-tr>
+                  <b-td>Stakeholders</b-td>
+                  <b-td>UAT</b-td>
+                  <b-td>0</b-td>
+                  <b-td>1</b-td>
+                  <b-td>
+                    <b-button-group>
+
+                    </b-button-group>
+                  </b-td>
+                </b-tr>
+                <b-tr>
+                  <b-td>Solution</b-td>
+                  <b-td></b-td>
+                  <b-td></b-td>
+                  <b-td></b-td>
+                  <b-td></b-td>
+                  <b-td></b-td>
+                  <b-td></b-td>
+                </b-tr>
+                <b-tr style="">
+                  <b-td>Endeavor</b-td>
+                  <b-td></b-td>
+                  <b-td></b-td>
+                  <b-td></b-td>
+                  <b-td></b-td>
+                </b-tr>
+                <b-tr>
+                  <b-td>Endeavor</b-td>
+                  <b-td></b-td>
+                  <b-td></b-td>
+                  <b-td></b-td>
+                  <b-td></b-td>
+                </b-tr>
+                <b-tr>
+                  <b-td>Endeavor</b-td>
+                  <b-td></b-td>
+                  <b-td></b-td>
+                  <b-td></b-td>
+                  <b-td></b-td>
+                </b-tr>
+              </b-tbody>
+            </b-table-simple>
           </b-form-group>
-          <div><p>{{getPractice}}</p></div>
-
-        </b-form>
+        </b-form-group>
       </b-tab>
-      <b-tab title="Alphas" :title-link-class="linkTabClass(1)">
+
+      <b-tab title="Activities" :title-link-class="linkTabClass(5)">
+        <b-form-group description="Available activity spaces" label="Activity Spaces" label-class="font-weight-bold"
+                      class="shadow p-3 mb-5 bg-white rounded border border-info p-2">
+          <b-input-group>
+            <b-form-select
+                value-field="id"
+                text-field="name"
+                v-model="activitySpaceSelected" :options="activitySpaces">
+            </b-form-select>
+            <b-input-group-append class="ml-2">
+              <b-button variant="info">Add</b-button>
+            </b-input-group-append>
+          </b-input-group>
+          <p class="text-center text-black-50 bg-warning mt-3">Available activity spaces</p>
+          <b-table-simple small striped hover outlined class="mt-3">
+            <b-thead head-variant="dark">
+              <b-tr>
+                <b-th>Activity Space</b-th>
+                <b-th>Area of concern</b-th>
+                <b-th></b-th>
+              </b-tr>
+            </b-thead>
+            <b-tbody>
+              <b-tr>
+                <b-td>Shape the system</b-td>
+                <b-td></b-td>
+                <b-td></b-td>
+              </b-tr>
+              <b-tr>
+                <b-td>Understand requirements</b-td>
+                <b-td></b-td>
+                <b-td></b-td>
+              </b-tr>
+            </b-tbody>
+          </b-table-simple>
+          <b-form-group label="Activities" label-class="font-weight-bold" description="Things to do">
+            <b-form-group label="Activity Space that organize the activity">
+              <b-form-select
+                  value-field="id"
+                  text-field="name"
+                  v-model="activitySpaceSelected" :options="activitySpaces"></b-form-select>
+            </b-form-group>
+            <b-form-group label="Activity">
+              <b-input-group>
+                <b-form-select v-model="workProduct" :options="workProducts">
+                </b-form-select>
+                <b-input-group-append class="ml-2">
+                  <b-button variant="info">Add</b-button>
+                </b-input-group-append>
+              </b-input-group>
+            </b-form-group>
+
+            <b-table-simple small striped hover class="mt-3">
+              <b-thead head-variant="dark">
+                <b-tr>
+                  <b-th>Activity</b-th>
+                  <b-th></b-th>
+                  <b-th></b-th>
+                </b-tr>
+              </b-thead>
+              <b-tbody>
+                <b-tr>
+                  <b-td></b-td>
+                  <b-td></b-td>
+                  <b-td></b-td>
+                </b-tr>
+              </b-tbody>
+            </b-table-simple>
+          </b-form-group>
+
+        </b-form-group>
 
       </b-tab>
-      <b-tab title="Work products" :title-link-class="linkTabClass(2)">
+
+      <b-tab title="Patterns" :title-link-class="linkTabClass(6)">
 
       </b-tab>
     </b-tabs>
@@ -78,234 +343,6 @@
     <b-row>
       <b-col>
         <b-form class="mb-5">
-
-          <b-form-group class="shadow p-3 mb-5 bg-white rounded border border-info p-2" label="Alphas" label-class="font-weight-bold"
-                        description="Things to work with">
-            <b-input-group>
-              <b-form-select v-model="alphaSelected" :options="alphas" text-field="name" value-field="id">
-                <template #first>
-                  <b-form-select-option :value="null" disabled>-- Please select an alpha --</b-form-select-option>
-                </template>
-              </b-form-select>
-              <b-input-group-append class="ml-2">
-                <b-button size="sm" variant="info">Add</b-button>
-                <b-button size="sm" variant="success" class="ml-2">New</b-button>
-              </b-input-group-append>
-            </b-input-group>
-            <b-table-simple small striped class="mt-3">
-              <b-thead>
-                <b-tr>
-                  <b-th>Name</b-th>
-                  <b-th>Area of concern</b-th>
-                  <b-th></b-th>
-                </b-tr>
-              </b-thead>
-              <b-tbody>
-                <b-tr>
-                  <b-td>Alpha</b-td>
-                  <b-td></b-td>
-                  <b-td></b-td>
-                </b-tr>
-                <b-tr>
-                  <b-td>Alpha 123</b-td>
-                  <b-td></b-td>
-                  <b-td></b-td>
-                </b-tr>
-              </b-tbody>
-            </b-table-simple>
-          </b-form-group>
-
-          <b-form-group
-              class="shadow p-3 mb-5 bg-white rounded border border-info p-2"
-              label="Work products"
-              description="Activity result that describes an alpha"
-              label-class="font-weight-bold">
-            <b-form-group label="Work Product" label-cols="3">
-              <b-input-group>
-                <b-form-select v-model="workProduct" :options="workProducts">
-                </b-form-select>
-                <b-input-group-append class="ml-2">
-                  <b-button size="sm" variant="info">Add</b-button>
-                  <b-button size="sm" variant="success" class="ml-2">New</b-button>
-                </b-input-group-append>
-              </b-input-group>
-            </b-form-group>
-            <b-form-group>
-              <b-table-simple small striped hover class="mt-2">
-                <b-thead head-variant="dark">
-                  <b-tr>
-                    <b-th>Work Product</b-th>
-                    <b-th>Description</b-th>
-                    <b-th></b-th>
-                  </b-tr>
-                </b-thead>
-                <b-tbody>
-                  <b-tr>
-                    <b-td>Test Case</b-td>
-                    <b-td></b-td>
-                    <b-td><b-button variant="danger" size="sm"><b-icon-trash></b-icon-trash></b-button></b-td>
-                  </b-tr>
-                  <b-tr>
-                    <b-td>Test Case</b-td>
-                    <b-td></b-td>
-                    <b-td></b-td>
-                  </b-tr>
-                </b-tbody>
-              </b-table-simple>
-            </b-form-group>
-          </b-form-group>
-
-          <b-form-group class="shadow p-3 mb-5 bg-white rounded border border-info p-2"
-                        label="Work products manifest"
-                        label-align="left"
-                        label-class="font-weight-bold"
-                        description="Concrete work products representation to describe the alpha">
-            <b-form-group label="Lower Bound" label-cols="3">
-              <b-input></b-input>
-            </b-form-group>
-            <b-form-group label="Upper Bound" label-cols="3">
-              <b-input></b-input>
-            </b-form-group>
-            <b-form-group label="Alpha" label-cols="3"
-                description="Alpha bound by this manifest">
-              <b-form-select v-model="workProduct" :options="workProducts">
-              </b-form-select>
-            </b-form-group>
-            <b-form-group label="Work Product" label-cols="3"
-                          description="Work product bound by this manifest">
-              <b-form-select v-model="workProduct" :options="workProducts">
-              </b-form-select>
-            </b-form-group>
-            <b-form-group>
-              <b-button variant="info">Add</b-button>
-            </b-form-group>
-
-            <b-form-group>
-              <b-table-simple small striped class="mt-2">
-                <b-thead>
-                  <b-tr>
-                    <b-th>Alpha</b-th>
-                    <b-th>Work Product</b-th>
-                    <b-th>Lower Bound</b-th>
-                    <b-th>Upper Bound</b-th>
-                    <b-th></b-th>
-                  </b-tr>
-                </b-thead>
-                <b-tbody>
-                  <b-tr>
-                    <b-td>Stakeholders</b-td>
-                    <b-td>UAT</b-td>
-                    <b-td>0</b-td>
-                    <b-td>1</b-td>
-                    <b-td><b-button-group>
-
-                    </b-button-group></b-td>
-                  </b-tr>
-                  <b-tr>
-                    <b-td>Solution</b-td>
-                    <b-td></b-td>
-                    <b-td></b-td>
-                    <b-td></b-td>
-                    <b-td></b-td>
-                    <b-td></b-td>
-                    <b-td></b-td>
-                  </b-tr>
-                  <b-tr style="">
-                    <b-td>Endeavor</b-td>
-                    <b-td></b-td>
-                    <b-td></b-td>
-                    <b-td></b-td>
-                    <b-td></b-td>
-                  </b-tr>
-                  <b-tr>
-                    <b-td>Endeavor</b-td>
-                    <b-td></b-td>
-                    <b-td></b-td>
-                    <b-td></b-td>
-                    <b-td></b-td>
-                  </b-tr>
-                  <b-tr>
-                    <b-td>Endeavor</b-td>
-                    <b-td></b-td>
-                    <b-td></b-td>
-                    <b-td></b-td>
-                    <b-td></b-td>
-                  </b-tr>
-                </b-tbody>
-              </b-table-simple>
-            </b-form-group>
-          </b-form-group>
-          <b-form-group description="Available activity spaces" label="Activity Spaces" label-class="font-weight-bold"
-                        class="shadow p-3 mb-5 bg-white rounded border border-info p-2">
-              <b-input-group>
-                <b-form-select
-                    value-field="id"
-                    text-field="name"
-                    v-model="activitySpaceSelected" :options="activitySpaces">
-                </b-form-select>
-                <b-input-group-append class="ml-2">
-                  <b-button variant="info">Add</b-button>
-                </b-input-group-append>
-              </b-input-group>
-            <p class="text-center text-black-50 bg-warning mt-3">Available activity spaces</p>
-            <b-table-simple small striped hover outlined  class="mt-3">
-              <b-thead head-variant="dark">
-                <b-tr>
-                  <b-th>Activity Space</b-th>
-                  <b-th>Area of concern</b-th>
-                  <b-th></b-th>
-                </b-tr>
-              </b-thead>
-              <b-tbody>
-                <b-tr>
-                  <b-td>Shape the system</b-td>
-                  <b-td></b-td>
-                  <b-td></b-td>
-                </b-tr>
-                <b-tr>
-                  <b-td>Understand requirements</b-td>
-                  <b-td></b-td>
-                  <b-td></b-td>
-                </b-tr>
-              </b-tbody>
-            </b-table-simple>
-            <b-form-group label="Activities"  label-class="font-weight-bold"  description="Things to do">
-              <b-form-group label="Activity Space that organize the activity">
-                <b-form-select
-                    value-field="id"
-                    text-field="name"
-                    v-model="activitySpaceSelected" :options="activitySpaces"></b-form-select>
-              </b-form-group>
-              <b-form-group label="Activity">
-                <b-input-group>
-                  <b-form-select v-model="workProduct" :options="workProducts">
-                  </b-form-select>
-                  <b-input-group-append class="ml-2">
-                    <b-button variant="info">Add</b-button>
-                  </b-input-group-append>
-                </b-input-group>
-              </b-form-group>
-
-              <b-table-simple small striped hover class="mt-3">
-                <b-thead head-variant="dark">
-                  <b-tr>
-                    <b-th>Activity</b-th>
-                    <b-th></b-th>
-                    <b-th></b-th>
-                  </b-tr>
-                </b-thead>
-                <b-tbody>
-                  <b-tr>
-                    <b-td></b-td>
-                    <b-td></b-td>
-                    <b-td></b-td>
-                  </b-tr>
-                </b-tbody>
-              </b-table-simple>
-            </b-form-group>
-
-          </b-form-group>
-
         </b-form>
       </b-col>
     </b-row>
@@ -314,11 +351,15 @@
 
 <script>
 import {mapActions, mapGetters} from 'vuex'
+
 export default {
   name: "ModelPractice",
   data() {
     return {
+      dismissSecs: 5,
+      dismissCountDown: 0,
       tabIndex: 0,
+      alertMessage: '',
       practice: {
         id: '',
         name: '',
@@ -326,7 +367,7 @@ export default {
         tags: [],
         resources: [],
         properties: [],
-        measure: [],
+        measures: [],
         entry: [],
         result: []
       },
@@ -348,29 +389,37 @@ export default {
       ],
       alphasSelected: [],
       activitySpaces: [
-        {id: '1', name: 'Explore possibilities', areaOfConcern:''},
-        {id: '2', name: 'Understand the requirements', areaOfConcern:''},
-        {id: '3', name: 'Test the system', areaOfConcern:''},
-        {id: '4', name: 'Coordinate activity', areaOfConcern:''},
-        {id: '5', name: 'Support the team', areaOfConcern:''},
+        {id: '1', name: 'Explore possibilities', areaOfConcern: ''},
+        {id: '2', name: 'Understand the requirements', areaOfConcern: ''},
+        {id: '3', name: 'Test the system', areaOfConcern: ''},
+        {id: '4', name: 'Coordinate activity', areaOfConcern: ''},
+        {id: '5', name: 'Support the team', areaOfConcern: ''},
       ],
       activitySpaceSelected: null
     }
   },
   computed: {
-    ...mapGetters('practice', ['getPractice', 'getErrorMessage']),
-    availableOptions() {
-      return this.options.filter(opt => this.value.indexOf(opt.value) === -1)
-    }
+    ...mapGetters('practice', ['getPractice', 'getPractices','getErrorMessage', 'getInfoMessage'])
   },
   methods: {
-    ...mapActions('practice', ['create', 'updatePractice']),
+    ...mapActions('practice', ['create', 'updatePractice', 'fetchAvailablePractices', 'setPracticeToEdit', 'defaultPractice']),
+    countDownChanged(dismissCountDown) {
+      this.dismissCountDown = dismissCountDown
+    },
     async onSavePractice() {
-      if (this.practice.id === '') {
-        await this.create(this.practice);
+      this.dismissCountDown = this.dismissSecs;
+      if (this.getPractice.id === '') {
+        await this.create(this.getPractice);
       } else {
-        await this.updatePractice(this.practice)
+        await this.updatePractice(this.getPractice)
       }
+      this.alertMessage = this.getErrorMessage === '' ? this.getInfoMessage : this.getErrorMessage;
+    },
+    async onLoad() {
+      await this.fetchAvailablePractices();
+    },
+    onNewPractice() {
+      this.defaultPractice();
     },
     linkTabClass(index) {
       if (this.tabIndex === index) {
@@ -378,12 +427,24 @@ export default {
       } else {
         return ['bg-light', 'text-secondary']
       }
+
+    },
+    onTabSelectionChange(newTabIndex, prevTabIndex) {
+      console.log('saving tab --- actual ' + this.tabIndex + ' new ->' + newTabIndex + ' previous ->' + prevTabIndex)
+    },
+    async onPracticeEdit(practice) {
+      console.log(practice)
+      this.tabIndex = 1;
+      await this.setPracticeToEdit(practice);
     }
   },
   mounted() {
+    console.log('mounted model practice');
+    this.onLoad();
     this.practice.id = this.getPractice.id;
     this.practice.name = this.getPractice.name;
     this.practice.objective = this.getPractice.objective;
+    this.practice.tags = this.getPractice.tags;
   }
 }
 </script>

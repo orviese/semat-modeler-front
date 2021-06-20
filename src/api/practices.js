@@ -20,5 +20,8 @@ export default {
     },
     updatePractice(practiceData){
         return this.execute('patch', '/practices', practiceData, {})
+    },
+    fetchAllPractices() {
+        return this.execute('get', '/practices', null, {});
     }
 }
