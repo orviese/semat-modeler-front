@@ -79,10 +79,10 @@ const actions = {
         }
 
     },
-    async signOut({commit}){
+    async signOut({commit, rootState}){
         await accountService.signOut();
         commit('setLoggedIn', false);
-        //commit('clearState', rootState);
+        commit('clearState', rootState);
         await router.push('/signin');
 
     }
@@ -93,6 +93,9 @@ const mutations = {
     clearErrorMessage(state){
         state.errorMessage = '';
     },
+    clearState(payload) {
+        console.log('Clearing state ' + payload)
+    },
     setErrorMessage(state, payload){
         state.errorMessage = payload;
     },
@@ -102,19 +105,23 @@ const mutations = {
     setLoggedIn(state, payload){
         state.isLogged = payload;
         if (!payload){
+            state.account = state.accountDefault;
+            /*
             this.replaceState({
                 account: {
                     account: state.accountDefault,
                     isLogged: false
                 },
+
                 practice: {
-                    practice: {
-                        id: '',
-                        name: '',
-                        objective: ''
-                    }
+                    practice: practice.defaultPractice,
+                    practices: []
+                },
+                areaOfConcern: {
+                    areasOfConcern: [],
+                    areaOfConcern: areaOfConcern.defaultAreaOfConcern
                 }
-            });
+            });*/
         }
     },
 

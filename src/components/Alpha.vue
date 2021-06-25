@@ -2,21 +2,21 @@
   <b-container>
     <b-form @submit.prevent="" @reset.prevent="onReset" class="mb-5">
       <b-form-group label="Name" label-class="font-weight-bold">
-        <b-form-input v-model="alpha.name" type="text" placeholder="Alpha name">
+        <b-form-input v-model="getAlpha.name" type="text" placeholder="Alpha name">
         </b-form-input>
       </b-form-group>
 
       <b-form-group label="Brief description" label-class="font-weight-bold">
-        <b-form-input v-model="alpha.description" placeholder="Alpha brief description">
+        <b-form-input v-model="getAlpha.briefDescription" placeholder="Alpha brief description">
         </b-form-input>
       </b-form-group>
 
       <b-form-group label="Description" label-class="font-weight-bold">
-        <b-form-textarea v-model="alpha.description" rows="4" size="sm"></b-form-textarea>
+        <b-form-textarea v-model="getAlpha.description" rows="4" size="sm"></b-form-textarea>
       </b-form-group>
 
-      <b-form-group label="Is kernel?" label-class="font-weight-bold">
-        <b-form-select v-model="isKernel" :options="isKernelOptions">
+      <b-form-group label="Is kernel?" label-class="font-weight-bold" label-cols="3">
+        <b-form-select v-model="getAlpha.isKernel" :options="isKernelOptions">
           <template #first>
             <b-form-select-option :value="null" disabled>
               -- Please select an option --
@@ -25,121 +25,49 @@
         </b-form-select>
       </b-form-group>
 
-      <b-form-group label="Area or concern" label-cols="3" v-if="isKernel">
+      <b-form-group label-class="font-weight-bold" label="Area or concern" label-cols="3"
+                    v-if="getAlpha.isKernel">
         <b-input-group>
-          <b-form-select>
+          <b-form-select @change="getColor"
+              value-field="_id"
+              text-field="name"
+              v-model="aoc"
+              :options="getAllAreasOfConcern">
             <template #first>
               <b-form-select-option :value="null" disabled>
                 -- Please select an area of concern --
               </b-form-select-option>
             </template>
           </b-form-select>
-          <b-input-group-append class="ml-2">
-            <b-button variant="">Add new</b-button>
+          <b-input-group-append v-if="aocColor !== ''">
+            <b-button squared class="ml-2" v-bind:style="{backgroundColor: aocColor}">
+              <b-icon-book scale="1.5"></b-icon-book>
+            </b-button>
           </b-input-group-append>
         </b-input-group>
       </b-form-group>
-      <b-form-group label="Super Alpha" v-if="!isKernel" label-class="font-weight-bold">
+      <b-form-group label="Super Alpha" label-cols="3"
+                    v-if="null !== getAlpha.isKernel && !getAlpha.isKernel" label-class="font-weight-bold">
         <b-form-select v-model="superAlpha" :options="superAlphaOptions">
         </b-form-select>
       </b-form-group>
 
-      <b-form-group
-          label="Work products manifest"
-          label-align="left"
-          label-class="font-weight-bold"
-          description="Concrete work products representation to describe the alpha">
-        <b-form-group label="Lower Bound" label-cols="3">
-          <b-input></b-input>
-        </b-form-group>
-        <b-form-group label="Upper Bound" label-cols="3">
-          <b-input></b-input>
-        </b-form-group>
-        <b-form-group label="Work Product" label-cols="3">
-          <b-input-group>
-            <b-form-select v-model="workProduct" :options="workProductOptions">
-            </b-form-select>
-            <b-input-group-append class="ml-2">
-              <b-button variant="">Add new</b-button>
-            </b-input-group-append>
-          </b-input-group>
-        </b-form-group>
-        <b-form-group>
-          <b-table-simple small striped class="mt-2">
-            <b-thead>
-              <b-tr>
-                <b-th>Work Product</b-th>
-                <b-th>Description</b-th>
-                <b-th>Lower Bound</b-th>
-                <b-th>Upper Bound</b-th>
-                <b-th></b-th>
-              </b-tr>
-            </b-thead>
-            <b-tbody>
-              <b-tr>
-                <b-td>Customer</b-td>
-                <b-td></b-td>
-                <b-td></b-td>
-                <b-td></b-td>
-                <b-td></b-td>
-              </b-tr>
-              <b-tr>
-                <b-td>Solution</b-td>
-                <b-td></b-td>
-                <b-td></b-td>
-                <b-td></b-td>
-                <b-td></b-td>
-                <b-td></b-td>
-                <b-td></b-td>
-              </b-tr>
-              <b-tr style="">
-                <b-td>Endeavor</b-td>
-                <b-td></b-td>
-                <b-td></b-td>
-                <b-td></b-td>
-                <b-td></b-td>
-              </b-tr>
-              <b-tr>
-                <b-td>Endeavor</b-td>
-                <b-td></b-td>
-                <b-td></b-td>
-                <b-td></b-td>
-                <b-td></b-td>
-              </b-tr>
-              <b-tr>
-                <b-td>Endeavor</b-td>
-                <b-td></b-td>
-                <b-td></b-td>
-                <b-td></b-td>
-                <b-td></b-td>
-              </b-tr>
-            </b-tbody>
-          </b-table-simple>
-        </b-form-group>
-      </b-form-group>
-
-      <b-button variant="outline-secondary">Create</b-button>
+      <b-button variant="outline-success">Save</b-button>
       <b-button class="ml-3" type="reset" variant="outline-dark">Clear</b-button>
     </b-form>
   </b-container>
 </template>
 
 <script>
+import {mapGetters, mapActions} from "vuex";
 export default {
   name: "Alpha",
   data() {
     return {
-      isKernel: null,
       isKernelOptions: [{value: true, text: 'Yes'}, {value: false, text: 'No'}],
-      workProduct: null,
-      workProductOptions: [
-        {value: '1', text: 'work product 1'},
-        {value: '2', text: 'work product 2'},
-        {value: '3', text: 'work product 3'},
-        {value: '4', text: 'work product 4'},
-        {value: '5', text: 'work product 5'}
-      ],
       superAlpha: null,
+      aoc: null,
+      aocColor: '',
       superAlphaOptions: [
         {
           label: 'Kernel Alphas', options: [
@@ -151,31 +79,32 @@ export default {
         {value: '1', text: 'Alpha 1'},
         {value: '2', text: 'Alpha 2'},
         {value: '3', text: 'Alpha 3'},
-
-      ],
-      alpha: {
-        id: '',
-        isKernel: false,
-        areaOfConcern: '',
-        owner: '',
-        tags: [],
-        resources: [],
-        properties: [],
-        name: '',
-        icon: '',
-        briefDescription: '',
-        description: '',
-        states: []
+      ]
+    }
+  },
+  computed: {
+    ...mapGetters('alpha', ['getAlpha']),
+    ...mapGetters('areaOfConcern', ['getAllAreasOfConcern'])
+  },
+  methods: {
+    ...mapActions('alpha', ['defaultAlpha']),
+    ...mapActions('areaOfConcern', ['fetchAllAreasOfConcern']),
+    onReset() {
+      this.defaultAlpha();
+    },
+    async onLoad() {
+      await this.fetchAllAreasOfConcern();
+      this.aoc = this.getAllAreasOfConcern;
+    },
+    getColor() {
+      let areaFound = this.getAllAreasOfConcern.find(area => this.aoc === area._id);
+      if (areaFound) {
+        this.aocColor = areaFound.colorConvention;
       }
     }
   },
-  methods: {
-    onReset() {
-      this.alpha.id = '';
-      this.alpha.name = '';
-      this.alpha.description = '';
-      this.isKernel = null;
-    }
+  created() {
+    this.onLoad();
   }
 }
 </script>

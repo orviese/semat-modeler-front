@@ -29,31 +29,31 @@
         </b-table-simple>
       </b-tab>
       <b-tab title="Practice definition" :title-link-class="linkTabClass(1)">
-        <b-form class="mt-3">
+        <b-form class="mt-3" @submit.prevent="onSavePractice">
           <b-form-group>
           </b-form-group>
           <b-form-group>
-            <b-button size="lg" squared class="float-right" @click="onSavePractice" variant="success">Save</b-button>
-            <b-button squared size="lg" class="float-right mr-3" @click="onNewPractice">New</b-button>
+            <b-button type="submit" squared class="float-right" variant="success">Save</b-button>
+            <b-button squared class="float-right mr-3" @click="onNewPractice">New</b-button>
           </b-form-group>
           <b-form-group label-cols="2" label="Practice Name" label-class="font-weight-bold" class="color-font">
-            <b-form-input v-model="getPractice.name" placeholder="Software development practice"></b-form-input>
+            <b-form-input required v-model="getPractice.name" placeholder="Software development practice"></b-form-input>
           </b-form-group>
           <b-form-group label="Objective" label-class="font-weight-bold"
                         description="The objective of this Practice, expressed as a concise and isolated phrase. The content of this attribute should be an explicit and short statement that describes the goal that the practice pursues.">
-            <b-form-textarea rows="3" v-model="getPractice.objective"></b-form-textarea>
+            <b-form-textarea required rows="3" v-model="getPractice.objective"></b-form-textarea>
           </b-form-group>
           <b-form-group label="Tags" label-class="font-weight-bold"
                         description="Enter desired tags separated by comma ','">
             <b-form-tags
-                input-id="tags" tag-pills size="md" tag-variant="success" separator=","
+                input-id="tags" tag-class="font-weight-bold" tag-pills size="md" tag-variant="info" separator=","
                 v-model="getPractice.tags" placeholder="">
             </b-form-tags>
           </b-form-group>
           <b-form-group label="Resources" label-class="font-weight-bold"
                         description="Enter desired tags separated by comma ','">
             <b-form-tags
-                input-id="tags" tag-pills size="md" tag-variant="success" separator=","
+                input-id="tags-resource"  tag-class="font-weight-bold" tag-pills size="md" tag-variant="info" separator=","
                 v-model="getPractice.resources" placeholder="">
             </b-form-tags>
           </b-form-group>
@@ -61,7 +61,7 @@
           <b-form-group label="Properties" label-class="font-weight-bold"
                         description="Enter desired properties separated by comma ','">
             <b-form-tags
-                input-id="tags" tag-pills size="md" tag-variant="warning" separator=","
+                input-id="tags-properties"  tag-class="font-weight-bold" tag-pills size="md" tag-variant="info" separator=","
                 v-model="getPractice.properties" placeholder="">
             </b-form-tags>
           </b-form-group>
@@ -69,7 +69,7 @@
           <b-form-group label="Measures" label-class="font-weight-bold"
                         description="Enter desired tags separated by comma ','">
             <b-form-tags
-                input-id="tags" tag-pills size="md" tag-variant="dark" separator=","
+                input-id="tags-measures"  tag-class="font-weight-bold" tag-pills size="md" tag-variant="info" separator=","
                 v-model="getPractice.measures" placeholder="">
             </b-form-tags>
           </b-form-group>
@@ -77,16 +77,16 @@
           <b-form-group label="Entries" label-class="font-weight-bold"
                         description="Enter desired tags separated by comma ','">
             <b-form-tags
-                input-id="tags" tag-pills size="md" tag-variant="dark" separator=","
-                v-model="practice.tags" placeholder="">
+                input-id="tags-entry"  tag-class="font-weight-bold" tag-pills size="md" tag-variant="info" separator=","
+                v-model="getPractice.entry" placeholder="">
             </b-form-tags>
           </b-form-group>
 
           <b-form-group label="Results" label-class="font-weight-bold"
                         description="Enter desired tags separated by comma ','">
             <b-form-tags
-                input-id="tags" tag-pills size="md" tag-variant="success" separator=","
-                v-model="practice.tags" placeholder="">
+                input-id="tags-result"  tag-class="font-weight-bold" tag-pills size="md" tag-variant="info" separator=","
+                v-model="getPractice.result" placeholder="">
             </b-form-tags>
           </b-form-group>
           <div><p>{{ getPractice }}</p></div>
@@ -402,13 +402,14 @@ export default {
     ...mapGetters('practice', ['getPractice', 'getPractices','getErrorMessage', 'getInfoMessage'])
   },
   methods: {
-    ...mapActions('practice', ['create', 'updatePractice', 'fetchAvailablePractices', 'setPracticeToEdit', 'defaultPractice']),
+    ...mapActions('practice',
+        ['create', 'updatePractice', 'fetchAvailablePractices', 'setPracticeToEdit', 'defaultPractice']),
     countDownChanged(dismissCountDown) {
       this.dismissCountDown = dismissCountDown
     },
     async onSavePractice() {
       this.dismissCountDown = this.dismissSecs;
-      if (this.getPractice.id === '') {
+      if (this.getPractice._id === '') {
         await this.create(this.getPractice);
       } else {
         await this.updatePractice(this.getPractice)
@@ -441,10 +442,6 @@ export default {
   mounted() {
     console.log('mounted model practice');
     this.onLoad();
-    this.practice.id = this.getPractice.id;
-    this.practice.name = this.getPractice.name;
-    this.practice.objective = this.getPractice.objective;
-    this.practice.tags = this.getPractice.tags;
   }
 }
 </script>

@@ -7,13 +7,23 @@ const state = () => ({
         id: '',
         name: '',
         objective: '',
-        tags: []
+        tags: [],
+        resources: [],
+        properties: [],
+        measures: [],
+        entry: [],
+        result: []
     },
     defaultPractice: {
         _id: '',
         name: '',
         objective: '',
-        tags: []
+        tags: [],
+        resources: [],
+        properties: [],
+        measures: [],
+        entry: [],
+        result: []
     },
     errorMessage: '',
     infoMessage: ''
@@ -70,7 +80,7 @@ const actions = {
         try {
             let practices = await practiceService.fetchAllPractices();
             commit('setPractices', practices.data.practices);
-        }catch (e) {
+        } catch (e) {
             commit('setErrorMessage', 'problems getting available practices...');
         }
     },
@@ -100,14 +110,21 @@ const mutations = {
         state.practices = payload;
     },
     setPractice(state, payload) {
-        console.log('updating practice store', payload)
+        console.log('updating practice store')
+        /*
         console.log(payload._id)
         console.log(payload.name)
         console.log(payload.objective)
         state.practice.id = payload._id;
         state.practice.name = payload.name;
         state.practice.objective = payload.objective;
-        state.practice.tags = payload.tags
+        state.practice.tags = payload.tags;
+        state.practice.resources = payload.resources;
+        state.practice.properties = payload.properties;
+        state.practice.measures = payload.measures;
+        state.practice.entry = payload.entry;
+        state.practice.result = payload.result;*/
+        state.practice = payload;
     }
 }
 
