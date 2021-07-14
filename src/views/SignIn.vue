@@ -14,11 +14,13 @@
       <b-alert
           :show="showAlert"
           variant="danger"
-      >{{getErrorMessage}}</b-alert>
+      >{{ getErrorMessage }}
+      </b-alert>
       <b-button class="mr-3" type="submit" variant="dark">
         <b-icon icon="person"></b-icon>
-        Sign In</b-button>
-      {{getAccount}}
+        Sign In
+      </b-button>
+      {{ getAccount }}
     </b-form>
   </b-col>
 </template>
@@ -27,8 +29,8 @@
 import {mapGetters, mapActions} from 'vuex'
 
 export default {
-name: "SignIn",
-  data(){
+  name: "SignIn",
+  data() {
     return {
       showAlert: false,
       form: {
@@ -37,19 +39,26 @@ name: "SignIn",
       }
     }
   },
-  computed:{
+  computed: {
     ...mapGetters('account', ['getErrorMessage', 'getAccount'])
   },
-  methods:{
-    ...mapActions('account', ['signIn']),
-    async doSignIn(){
+  methods: {
+    ...mapActions('account', ['signIn', 'signOut']),
+    async doSignIn() {
       await this.signIn(this.form);
-      if (this.getErrorMessage !== ''){
+      if (this.getErrorMessage !== '') {
         this.showAlert = true;
-      }else {
+      } else {
         this.showAlert = false;
       }
     },
+    async doSingOut() {
+      await this.signOut()
+    }
+  },
+  mounted() {
+    this.doSingOut();
+    console.log('Mounting')
   }
 }
 </script>

@@ -2,15 +2,15 @@
 <div class="container">
   <b-row>
     <b-col>
-      <b-form @submit.prevent="" @reset.prevent="" class="my-3 mx-3">
-        <b-form-group label="Activity Space Name" label-class="font-weight-bold">
-          <b-form-input></b-form-input>
+      <b-form @submit.prevent="onSave" @reset.prevent="" class="my-3 mx-3">
+        <b-form-group label="" label-class="font-weight-bold">
+          <b-form-input required v-model="getActivitySpace.name" placeholder="Activity Space Name"></b-form-input>
         </b-form-group>
-        <b-form-group label="Description" label-class="font-weight-bold">
-          <b-form-textarea rows="3"></b-form-textarea>
+        <b-form-group label="" label-class="font-weight-bold">
+          <b-form-textarea required v-model="getActivitySpace.description" placeholder="Description" rows="3"></b-form-textarea>
         </b-form-group>
         <b-form-group label="Is kernel?" label-cols="2" label-class="font-weight-bold">
-          <b-form-select v-model="isKernel" :options="isKernelOptions">
+          <b-form-select required v-model="getActivitySpace.isKernel" :options="isKernelOptions">
             <template #first>
               <b-form-select-option :value="null" disabled>
                 -- Please select an option --
@@ -18,20 +18,27 @@
             </template>
           </b-form-select>
         </b-form-group>
-        <b-form-group label="Area or concern" label-cols="2" v-if="isKernel" label-class="font-weight-bold">
+        <b-form-group label="Area or concern" label-cols="2"
+                      v-if="getActivitySpace.isKernel" label-class="font-weight-bold">
           <b-input-group>
-            <b-form-select>
+            <b-form-select :required="getActivitySpace.isKernel ? true : false"
+                v-model="getActivitySpace.areaOfConcern"
+                value-field="_id"
+                text-field="name"
+                :options="getAllAreasOfConcern">
               <template #first>
                 <b-form-select-option :value="null" disabled>
                   -- Please select an area of concern --
                 </b-form-select-option>
               </template>
             </b-form-select>
+            <!--
             <b-input-group-append class="ml-2">
               <b-button variant="">Add new</b-button>
-            </b-input-group-append>
+            </b-input-group-append> -->
           </b-input-group>
         </b-form-group>
+        <!--
         <b-form-group label="Required Alphas as inputs" label-class="font-weight-bold">
           <b-form-select v-model="inputAlpha">
             <template #first>
@@ -41,55 +48,17 @@
             </template>
           </b-form-select>
         </b-form-group>
-        <b-button variant="outline-secondary">Create</b-button>
+        -->
+        <b-button type="submit" variant="outline-success">Save</b-button>
         <b-button class="ml-3" type="reset" variant="outline-dark">Clear</b-button>
       </b-form>
-    </b-col>
-  </b-row>
-  <b-row>
-    <b-col>
-      <b-table-simple small striped class="ml-3 mr-6 mt-5">
-        <b-thead>
-          <b-tr>
-            <b-th>Name</b-th>
-            <b-th>Description</b-th>
-            <b-th></b-th>
-          </b-tr>
-        </b-thead>
-        <b-tbody>
-          <b-tr>
-            <b-td>Customer</b-td>
-            <b-td></b-td>
-            <b-td></b-td>
-          </b-tr>
-          <b-tr>
-            <b-td>Solution</b-td>
-            <b-td></b-td>
-            <b-td></b-td>
-          </b-tr>
-          <b-tr style="">
-            <b-td>Endeavor</b-td>
-            <b-td></b-td>
-            <b-td></b-td>
-          </b-tr>
-          <b-tr v-bind:style="{backgroundColor: color}">
-            <b-td>Endeavor</b-td>
-            <b-td></b-td>
-            <b-td></b-td>
-          </b-tr>
-          <b-tr>
-            <b-td>Endeavor</b-td>
-            <b-td></b-td>
-            <b-td></b-td>
-          </b-tr>
-        </b-tbody>
-      </b-table-simple>
     </b-col>
   </b-row>
 </div>
 </template>
 
 <script>
+import {mapGetters, mapActions} from 'vuex';
 export default {
   name: "ActivitySpace",
   data() {
@@ -98,7 +67,31 @@ export default {
       inputAlpha: null,
       inputAlphas: [],
       isKernelOptions: [{value: true, text: 'Yes'}, {value: false, text: 'No'}],
+      selectedAOC: null
     }
+  },
+  computed: {
+    ...mapGetters('areaOfConcern', ['getAllAreasOfConcern']),
+    ...mapGetters('activitySpace', ['getActivitySpace', 'getActivitySpaces'])
+  },
+  methods: {
+    ...mapActions('areaOfConcern', ['fetchAllAreasOfConcern']),
+    ...mapActions('activitySpace', ['defaultActivitySpace', 'fetchAllActivitySpaces',
+      'updateActivitySpace', 'createActivitySpace']),
+    async onLoad() {
+      await this.fetchAllAreasOfConcern();
+    },
+    onSave() {
+      if(this.getActivitySpace._id !== '') {
+          this.updateActivitySpace(this.getActivitySpace);
+      } else {
+        console.log('saving new ...... ');
+        this.createActivitySpace(this.getActivitySpace);
+      }
+    }
+  },
+  mounted() {
+    this.onLoad();
   }
 }
 </script>

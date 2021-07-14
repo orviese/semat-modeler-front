@@ -23,7 +23,7 @@
               <b-td>{{practice.name}}</b-td>
               <b-td>{{practice.objective}}</b-td>
               <b-td>{{practice.tags}}</b-td>
-              <b-td><b-button variant="info" @click="onPracticeEdit(practice)">Edit</b-button></b-td>
+              <b-td><b-button variant="info" @click="onPracticeEdit(practice)"><b-icon-pencil></b-icon-pencil></b-button></b-td>
             </b-tr>
           </b-tbody>
         </b-table-simple>
@@ -97,34 +97,32 @@
                       label-class="font-weight-bold"
                       description="Things to work with">
           <b-input-group>
-            <b-form-select v-model="alphaSelected" :options="alphas" text-field="name" value-field="id">
+            <b-form-select v-model="alphaPracticeSelected" :options="getPracticeAlphas" text-field="name" value-field="_id">
               <template #first>
                 <b-form-select-option :value="null" disabled>-- Please select an alpha --</b-form-select-option>
               </template>
             </b-form-select>
             <b-input-group-append class="ml-2">
-              <b-button size="sm" variant="info">Add</b-button>
-              <b-button size="sm" variant="success" class="ml-2">New</b-button>
+              <b-button @click="addAlphaToPractice" :disabled="alphaPracticeSelected === null" size="sm" variant="info">Add</b-button>
+              <b-button @click="$bvModal.show('new-alpha')" size="sm" variant="success" class="ml-2">New</b-button>
             </b-input-group-append>
           </b-input-group>
           <b-table-simple small striped class="mt-3">
             <b-thead>
               <b-tr>
                 <b-th>Name</b-th>
-                <b-th>Area of concern</b-th>
-                <b-th></b-th>
+                <b-th>Description</b-th>
+                <b-th>Area Of Concern</b-th>
               </b-tr>
             </b-thead>
             <b-tbody>
-              <b-tr>
-                <b-td>Alpha</b-td>
-                <b-td></b-td>
-                <b-td></b-td>
-              </b-tr>
-              <b-tr>
-                <b-td>Alpha 123</b-td>
-                <b-td></b-td>
-                <b-td></b-td>
+              <b-tr v-for="alpha in getPractice.ownedElements.alphas" :key="alpha._id">
+                <b-td>{{alpha.name}}</b-td>
+                <b-td>{{alpha.description}}</b-td>
+                <b-td v-bind:style="{backgroundColor: findAreaOfConcernColor(alpha.areaOfConcern)}">
+                  {{findAreaOfConcernName(alpha.areaOfConcern)}}
+                </b-td>
+                <b-td><b-button @click="onRemoveAlphaFromPractice(alpha)" variant="danger" size="sm"><b-icon-trash></b-icon-trash></b-button></b-td>
               </b-tr>
             </b-tbody>
           </b-table-simple>
@@ -346,14 +344,23 @@
         </b-form>
       </b-col>
     </b-row>
+
+    <b-modal hide-footer id="new-alpha"
+             ref="modal"
+             title="Add new alpha to practice">
+      <alpha v-on:new-sub-alpha="newSubAlpha"
+             include-super-alpha :practice="getPractice._id"></alpha>
+    </b-modal>
+
   </div>
 </template>
 
 <script>
 import {mapActions, mapGetters} from 'vuex'
-
+import Alpha from "@/components/Alpha";
 export default {
   name: "ModelPractice",
+  components: {Alpha},
   data() {
     return {
       dismissSecs: 5,
@@ -380,13 +387,7 @@ export default {
       value: [],
       workProduct: null,
       workProducts: [],
-      alphaSelected: null,
-      alphas: [
-        {id: '1', name: 'stakeholders'},
-        {id: '1', name: 'system'},
-        {id: '1', name: 'requirements'},
-        {id: '1', name: 'work'},
-      ],
+      alphaPracticeSelected: null,
       alphasSelected: [],
       activitySpaces: [
         {id: '1', name: 'Explore possibilities', areaOfConcern: ''},
@@ -399,13 +400,41 @@ export default {
     }
   },
   computed: {
-    ...mapGetters('practice', ['getPractice', 'getPractices','getErrorMessage', 'getInfoMessage'])
+    ...mapGetters('practice', ['getPractice', 'getPractices','getErrorMessage', 'getInfoMessage']),
+    ...mapGetters('alpha', ['getPracticeAlphas']),
+    ...mapGetters('areaOfConcern', ['getAllAreasOfConcern'])
   },
   methods: {
     ...mapActions('practice',
-        ['create', 'updatePractice', 'fetchAvailablePractices', 'setPracticeToEdit', 'defaultPractice']),
+        ['create', 'updatePractice', 'fetchAvailablePractices', 'removeAlphaFromPractice',
+          'setPracticeToEdit', 'defaultPractice', 'addAlphaPractice']),
+    ...mapActions('alpha', ['fetchAllPracticeAlphas']),
+    ...mapActions('areaOfConcern', ['fetchAllAreasOfConcern']),
+    findAreaOfConcernColor(areaOfConcernId) {
+      let foundAC = this.getAllAreasOfConcern.find(e => e._id === areaOfConcernId);
+      if (foundAC) {
+        return foundAC.colorConvention;
+      }
+      return '';
+    },
+    findAreaOfConcernName(areaOfConcernId) {
+      let foundAC = this.getAllAreasOfConcern.find(e => e._id === areaOfConcernId);
+      if (foundAC) {
+        return foundAC.name;
+      }
+      return 'NOT FOUND';
+    },
+    onRemoveAlphaFromPractice(alpha) {
+      this.removeAlphaFromPractice({
+        practice: this.getPractice._id,
+        alpha: alpha._id
+      });
+    },
     countDownChanged(dismissCountDown) {
       this.dismissCountDown = dismissCountDown
+    },
+    newSubAlpha() {
+      console.log('New sub alpha created')
     },
     async onSavePractice() {
       this.dismissCountDown = this.dismissSecs;
@@ -418,6 +447,7 @@ export default {
     },
     async onLoad() {
       await this.fetchAvailablePractices();
+      await this.fetchAllAreasOfConcern();
     },
     onNewPractice() {
       this.defaultPractice();
@@ -430,17 +460,37 @@ export default {
       }
 
     },
-    onTabSelectionChange(newTabIndex, prevTabIndex) {
-      console.log('saving tab --- actual ' + this.tabIndex + ' new ->' + newTabIndex + ' previous ->' + prevTabIndex)
+    onTabSelectionChange(newTabIndex) {
+      if (newTabIndex === 2) {
+        this.fetchAllPracticeAlphas(this.getPractice._id);
+      }
     },
     async onPracticeEdit(practice) {
       console.log(practice)
       this.tabIndex = 1;
       await this.setPracticeToEdit(practice);
+    },
+    async addAlphaToPractice() {
+      if (this.tabIndex === 2 && this.alphaPracticeSelected !== null) {
+        let alpha = this.getPracticeAlphas.find(e => e._id === this.alphaPracticeSelected);
+        console.log('Alpha to add .... ' + JSON.stringify(alpha));
+        //if (!alpha.isKernel) {
+          await this.addAlphaPractice({
+            name: alpha.name,
+            description: alpha.description,
+            areaOfConcern: alpha.areaOfConcern,
+            parent: alpha.isKernel ? '' : alpha.superAlpha,
+            isKernel: alpha.isKernel
+          });
+        //}
+      }
     }
   },
-  mounted() {
+  created() {
     console.log('mounted model practice');
+    //this.onLoad();
+  },
+  mounted() {
     this.onLoad();
   }
 }

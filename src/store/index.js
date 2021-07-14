@@ -5,6 +5,7 @@ import account from './modules/account';
 import practice from './modules/practice';
 import areaOfConcern from './modules/area-of-concern';
 import alpha from './modules/alpha';
+import activitySpace from './modules/activity-space-store';
 //import * as Cookies from 'js-cookie'
 import SecureLS from "secure-ls";
 const ls = new SecureLS({
@@ -20,7 +21,8 @@ export default function (){
             account,
             practice,
             areaOfConcern,
-            alpha
+            alpha,
+            activitySpace
         },
         plugins: [createPersistedState({
             //paths: ['account', 'practice'],

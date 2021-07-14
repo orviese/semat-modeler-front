@@ -23,5 +23,12 @@ export default {
     },
     fetchAllPractices() {
         return this.execute('get', '/practices', null, {});
+    },
+    addAlphaPractice(data) {
+        return this.execute('post', '/practices/owned-element/alpha', data, {});
+    },
+    removeAlphaPractice(practice, alpha) {
+        return this.execute('delete',
+            `/practices/${practice}/owned-element/alpha/${alpha}`, null, {});
     }
 }

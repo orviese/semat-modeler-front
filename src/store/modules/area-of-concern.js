@@ -10,12 +10,6 @@ const state = () => ({
         name: '',
         description: '',
         colorConvention: ''
-    },
-    defaultAreaOfConcern: {
-        _id: '',
-        name: '',
-        description: '',
-        colorConvention: ''
     }
 });
 
@@ -28,6 +22,18 @@ const getters = {
     }
 }
 const actions = {
+    async addAreaOfConcern({dispatch, commit}, data) {
+        areasOfConcern.createAreaOfConcern(data)
+            .then(() => {
+                commit('setInfoMessage');
+                dispatch('fetchAllAreasOfConcern');
+            })
+            .catch(e => {
+                if (e.response.status !== 401) {
+                    commit('setErrorMessage', e.response.data.errors[0])
+                }
+            });
+    },
     async fetchAllAreasOfConcern({commit}) {
         try {
             let areasOfConcerns = await areasOfConcern.fetchAllAreasOfConcern();
@@ -43,14 +49,17 @@ const actions = {
         commit('setDefaultAreaOfConcern');
     },
     async deleteAreaOfConcern({dispatch, commit}, aocId) {
-        try {
-            let response = await areasOfConcern.removeAreasOfConcern(aocId);
-            console.log(response.status);
-            dispatch('fetchAllAreasOfConcern');
-            commit('setInfoMessage', 'Area of concern deleted.')
-        } catch (e) {
-            console.log(e);
-        }
+        areasOfConcern.removeAreasOfConcern(aocId)
+            .then(response => {
+                console.log(response.status);
+                dispatch('fetchAllAreasOfConcern');
+                commit('setInfoMessage', 'Area of concern deleted.')
+            })
+            .catch(e => {
+                if (e.response.status !== 401) {
+                    console.log(e.response.data.errors[0]);
+                }
+            });
     },
     async updateAreaOfConcern({dispatch, commit}, data) {
         try {
@@ -66,14 +75,18 @@ const actions = {
 }
 const mutations = {
     setAreasOfConcern(state, payload) {
-        console.log('setting areas of concern')
         state.areasOfConcern = payload;
     },
     setSelectedAreaOfConcern(state, payload) {
         state.areaOfConcern = payload;
     },
     setDefaultAreaOfConcern(state) {
-        state.areaOfConcern = state.defaultAreaOfConcern;
+        state.areaOfConcern = {
+            _id: '',
+            name: '',
+            description: '',
+            colorConvention: ''
+        };
     },
     setInfoMessage(state, payload) {
         state.infoMessage = payload;

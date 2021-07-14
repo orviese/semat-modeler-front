@@ -12,7 +12,10 @@ const state = () => ({
         properties: [],
         measures: [],
         entry: [],
-        result: []
+        result: [],
+        ownedElements: {
+            alphas: []
+        }
     },
     defaultPractice: {
         _id: '',
@@ -85,11 +88,38 @@ const actions = {
         }
     },
     async setPracticeToEdit({commit}, data) {
-        commit('setPractice', data);
+        commit('setPracticeToEdit', data);
         commit('setInfoMessage', 'Edit selected practice.')
     },
-    defaultPractice({commit, state}) {
-        commit('setPractice', state.defaultPractice);
+
+    defaultPractice({commit}) {
+        commit('setPractice');
+    },
+
+    addAlphaPractice({commit, state}, newAlpha) {
+        let payload = {
+            practiceId: state.practice._id,
+            alpha: newAlpha
+        }
+        practiceService.addAlphaPractice(payload)
+            .then(response => {
+                console.log(response.data.alphas);
+                commit('setOwnedAlphas', response.data.alphas);
+            })
+            .catch(err => {
+                console.error(err)
+            });
+
+    },
+    async removeAlphaFromPractice({commit}, data) {
+        console.log(data.practice, data.alpha);
+        practiceService.removeAlphaPractice(data.practice, data.alpha)
+            .then(response => {
+                commit('setOwnedAlphas', response.data.alphas);
+            })
+            .catch(err => {
+                console.error(err);
+            });
     }
 }
 
@@ -109,22 +139,30 @@ const mutations = {
     setPractices(state, payload) {
         state.practices = payload;
     },
-    setPractice(state, payload) {
+
+    setPractice(state) {
         console.log('updating practice store')
-        /*
-        console.log(payload._id)
-        console.log(payload.name)
-        console.log(payload.objective)
-        state.practice.id = payload._id;
-        state.practice.name = payload.name;
-        state.practice.objective = payload.objective;
-        state.practice.tags = payload.tags;
-        state.practice.resources = payload.resources;
-        state.practice.properties = payload.properties;
-        state.practice.measures = payload.measures;
-        state.practice.entry = payload.entry;
-        state.practice.result = payload.result;*/
+        state.practice = {
+            id: '',
+            name: '',
+            objective: '',
+            tags: [],
+            resources: [],
+            properties: [],
+            measures: [],
+            entry: [],
+            result: [],
+            ownedElements: {
+                alphas: []
+            }
+        }
+    },
+    setPracticeToEdit(state, payload) {
+        console.log('updating practice to edit')
         state.practice = payload;
+    },
+    setOwnedAlphas(state, payload) {
+        state.practice.ownedElements.alphas = payload;
     }
 }
 

@@ -1,5 +1,5 @@
-import router from "@/router";
 import axios from "axios";
+import router from "@/router";
 
 const client = axios.create({
     baseURL: process.env.VUE_APP_SEMAT_API_ENDPOINT,
@@ -12,7 +12,6 @@ client.interceptors.response.use(
         return res;
     },
     async (err) => {
-        console.log(err);
         if (err.response.status === 401) {
             await router.push('/signin');
         } else {
@@ -22,7 +21,7 @@ client.interceptors.response.use(
 );
 
 export default {
-    async execute(method, resource, data, headers){
+    async execute(method, resource, data, headers) {
         return client({
             method,
             url: resource,
@@ -30,16 +29,19 @@ export default {
             headers
         })
     },
-    createAreaOfConcern(data){
-        return this.execute('post', '/areas-of-concern', data, {});
+    createCompetency(data) {
+        return this.execute('post', '/competencies', data, {});
     },
-    updateAreaOfConcern(data){
-        return this.execute('put', '/areas-of-concern', data, {})
+    updateCompetency(data) {
+        return this.execute('put', '/competencies', data, {})
     },
-    fetchAllAreasOfConcern() {
-        return this.execute('get', '/areas-of-concern', null, {});
+    fetchAllCompetencies() {
+        return this.execute('get', '/competencies', null, {});
     },
-    removeAreasOfConcern(id) {
-        return this.execute('delete', `/areas-of-concern/${id}`, null, {});
+    fetchPracticeCompetencies(id) {
+        return this.execute('get', `/competencies/practice/${id}`, null, {});
+    },
+    removeCompetency(id) {
+        return this.execute('delete', `/competencies/${id}`, null, {});
     }
 }

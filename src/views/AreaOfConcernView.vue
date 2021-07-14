@@ -1,8 +1,8 @@
 <template>
   <b-container>
-    <h3>Areas of concern</h3>
+    <h3 class="text-center">Areas of concern</h3>
     <area-of-concern></area-of-concern>
-    <b-table-simple small striped hover class="ml-3 mr-6 mt-5">
+    <b-table-simple responsive="md" small striped hover class="ml-3 mr-6 mt-5">
       <b-thead head-variant="dark">
         <b-tr>
           <b-th>Name</b-th>

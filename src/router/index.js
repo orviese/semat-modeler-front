@@ -12,6 +12,7 @@ import NewHome from "@/views/NewHome";
 import AlphaView from "@/views/AlphaView";
 import ActivitySpaceView from "@/views/ActivitySpaceView";
 import ModelPractice from "@/views/ModelPractice";
+import CompetencyView from "@/views/CompetencyView";
 
 Vue.use(VueRouter)
 
@@ -69,6 +70,12 @@ const routes = [
         name: 'ModelPractices',
         component: ModelPractice,
         meta: {secure: true},
+      },
+      {
+        path: '/competencies',
+        name: 'Competency',
+        component: CompetencyView,
+        meta: {secure: true},
       }
       /*,{
         path: '/dashboard',
@@ -108,7 +115,6 @@ const router = new VueRouter({
 
 router.beforeEach((to, from, next)=>{
   const isLogged = store().state.account.isLogged;
-  //console.log(to);
   if (to.matched.some(value => value.meta.secure) && isLogged){
     next();
   }else if(to.name !== 'SignIn' && to.name !== 'SignUp'){

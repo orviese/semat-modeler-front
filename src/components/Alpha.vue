@@ -1,22 +1,22 @@
 <template>
   <b-container>
-    <b-form @submit.prevent="" @reset.prevent="onReset" class="mb-5">
-      <b-form-group label="Name" label-class="font-weight-bold">
-        <b-form-input v-model="getAlpha.name" type="text" placeholder="Alpha name">
+    <b-form @submit.prevent="onSave" @reset.prevent="onReset" class="mb-5">
+      <b-form-group label-class="font-weight-bold">
+        <b-form-input v-model="getAlpha.name" type="text" placeholder="Alpha Name" required>
         </b-form-input>
       </b-form-group>
 
-      <b-form-group label="Brief description" label-class="font-weight-bold">
-        <b-form-input v-model="getAlpha.briefDescription" placeholder="Alpha brief description">
+      <b-form-group label-class="font-weight-bold">
+        <b-form-input v-model="getAlpha.briefDescription" placeholder="Alpha brief description" required>
         </b-form-input>
       </b-form-group>
 
-      <b-form-group label="Description" label-class="font-weight-bold">
-        <b-form-textarea v-model="getAlpha.description" rows="4" size="sm"></b-form-textarea>
+      <b-form-group label-class="font-weight-bold">
+        <b-form-textarea placeholder="More complete description" v-model="getAlpha.description" rows="4" size="sm" required></b-form-textarea>
       </b-form-group>
 
       <b-form-group label="Is kernel?" label-class="font-weight-bold" label-cols="3">
-        <b-form-select v-model="getAlpha.isKernel" :options="isKernelOptions">
+        <b-form-select v-bind:disabled="!includeSuperAlpha" v-model="getAlpha.isKernel" :options="isKernelOptions" required>
           <template #first>
             <b-form-select-option :value="null" disabled>
               -- Please select an option --
@@ -28,15 +28,13 @@
       <b-form-group label-class="font-weight-bold" label="Area or concern" label-cols="3"
                     v-if="getAlpha.isKernel">
         <b-input-group>
-          <b-form-select @change="getColor"
-              value-field="_id"
-              text-field="name"
-              v-model="aoc"
-              :options="getAllAreasOfConcern">
+          <b-form-select :required="getAlpha.isKernel !== null && getAlpha.isKernel" @change="getColor"
+                         value-field="_id"
+                         text-field="name"
+                         v-model="getAlpha.areaOfConcern"
+                         :options="getAllAreasOfConcern">
             <template #first>
-              <b-form-select-option :value="null" disabled>
-                -- Please select an area of concern --
-              </b-form-select-option>
+              <b-form-select-option :value="null" disabled>-- Please select an area of concern --</b-form-select-option>
             </template>
           </b-form-select>
           <b-input-group-append v-if="aocColor !== ''">
@@ -47,12 +45,17 @@
         </b-input-group>
       </b-form-group>
       <b-form-group label="Super Alpha" label-cols="3"
-                    v-if="null !== getAlpha.isKernel && !getAlpha.isKernel" label-class="font-weight-bold">
-        <b-form-select v-model="superAlpha" :options="superAlphaOptions">
+                    v-if="null !== getAlpha.isKernel
+                    && !getAlpha.isKernel" label-class="font-weight-bold">
+        <b-form-select :required="getAlpha.isKernel === false && includeSuperAlpha === true"
+                       v-model="getAlpha.superAlpha"
+                       value-field="_id"
+                       text-field="name"
+                       :options="getKernelAlphas">
         </b-form-select>
       </b-form-group>
 
-      <b-button variant="outline-success">Save</b-button>
+      <b-button variant="outline-success" type="submit">Save</b-button>
       <b-button class="ml-3" type="reset" variant="outline-dark">Clear</b-button>
     </b-form>
   </b-container>
@@ -60,50 +63,71 @@
 
 <script>
 import {mapGetters, mapActions} from "vuex";
+
 export default {
   name: "Alpha",
+  props: {
+    includeSuperAlpha: Boolean,
+    practice: String
+  },
   data() {
     return {
       isKernelOptions: [{value: true, text: 'Yes'}, {value: false, text: 'No'}],
       superAlpha: null,
       aoc: null,
       aocColor: '',
-      superAlphaOptions: [
-        {
-          label: 'Kernel Alphas', options: [
-            {value: '1', text: 'Requirements'},
-            {value: '1', text: 'Software'},
-            {value: '1', text: 'Stakeholders'},
-          ]
-        },
-        {value: '1', text: 'Alpha 1'},
-        {value: '2', text: 'Alpha 2'},
-        {value: '3', text: 'Alpha 3'},
-      ]
     }
   },
   computed: {
-    ...mapGetters('alpha', ['getAlpha']),
-    ...mapGetters('areaOfConcern', ['getAllAreasOfConcern'])
+    ...mapGetters('alpha', ['getAlpha', 'getAlphas']),
+    ...mapGetters('areaOfConcern', ['getAllAreasOfConcern']),
+    getKernelAlphas() {
+      return [{
+        label: 'Kernel Alphas', options: this.getAlphas.filter(alpha => alpha.isKernel)
+      }]
+    }
   },
   methods: {
-    ...mapActions('alpha', ['defaultAlpha']),
+    ...mapActions('alpha', ['defaultAlpha', 'createAlpha', 'updateAlpha', 'fetchAllAlphas', 'setAlphaOwner']),
     ...mapActions('areaOfConcern', ['fetchAllAreasOfConcern']),
-    onReset() {
-      this.defaultAlpha();
+    async onReset() {
+      await this.defaultAlpha(this.includeSuperAlpha);
+    },
+    async onSave() {
+      if (this.getAlpha.superAlpha !== null) {
+        let superAlpha = this.getAlphas.find(e => e._id === this.getAlpha.superAlpha);
+        if (superAlpha !== null && superAlpha !== undefined) {
+          this.getAlpha.areaOfConcern = superAlpha.areaOfConcern;
+        }
+      }
+      if (this.getAlpha._id === null || this.getAlpha._id === '') {
+        if (null !== this.practice &&  '' !== this.practice) {
+          this.setAlphaOwner(this.practice);
+        }
+        await this.createAlpha(this.getAlpha);
+      } else {
+        await this.updateAlpha(this.getAlpha);
+      }
+      await this.onReset();
+      this.$emit('new-sub-alpha');
     },
     async onLoad() {
       await this.fetchAllAreasOfConcern();
       this.aoc = this.getAllAreasOfConcern;
+      if (!this.includeSuperAlpha) {
+        this.getAlpha.isKernel = true;
+      }
     },
     getColor() {
-      let areaFound = this.getAllAreasOfConcern.find(area => this.aoc === area._id);
+      let areaFound = this.getAllAreasOfConcern.find(area => this.getAlpha.areaOfConcern === area._id);
       if (areaFound) {
         this.aocColor = areaFound.colorConvention;
+      } else {
+        this.aocColor = '';
       }
     }
   },
-  created() {
+  mounted() {
     this.onLoad();
   }
 }
