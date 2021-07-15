@@ -1,17 +1,17 @@
 <template>
   <b-container>
     <h3 class="text-center">Competencies</h3>
-    <b-form @submit.prevent="" @reset.prevent="" class="my-3 mx-3">
+    <b-form @submit.prevent="onSaveCompetency" @reset.prevent="onClear" class="my-3 mx-3">
       <b-form-group label="" label-class="font-weight-bold">
-        <b-form-input required v-model="name" placeholder="Competency Name"></b-form-input>
+        <b-form-input required v-model="getCompetency.name" placeholder="Competency Name"></b-form-input>
       </b-form-group>
       <b-form-group label="" label-class="font-weight-bold">
-        <b-form-textarea required v-model="description" placeholder="Description" rows="3"></b-form-textarea>
+        <b-form-textarea required v-model="getCompetency.description" placeholder="Description" rows="3"></b-form-textarea>
       </b-form-group>
       <b-form-group label="Area or concern" label-cols="2" label-class="font-weight-bold">
         <b-input-group>
           <b-form-select required @change="getColor"
-              v-model="areaOfConcern"
+              v-model="getCompetency.areaOfConcern"
               value-field="_id"
               text-field="name"
               :options="getAllAreasOfConcern">
@@ -35,7 +35,7 @@
 </template>
 
 <script>
-import {mapGetters} from "vuex";
+import {mapActions, mapGetters} from "vuex";
 
 export default {
   name: "Competency",
@@ -48,16 +48,32 @@ export default {
     }
   },
   computed: {
+    ...mapGetters('competency', ['getCompetency']),
     ...mapGetters('areaOfConcern', ['getAllAreasOfConcern'])
   },
   methods: {
+    ...mapActions('competency', ['defaultCompetency', 'createCompetency', 'updateCompetency']),
     getColor() {
-      let areaFound = this.getAllAreasOfConcern.find(area => this.areaOfConcern === area._id);
+      let areaFound = this.getAllAreasOfConcern.find(area => this.getCompetency.areaOfConcern === area._id);
       if (areaFound) {
         this.aocColor = areaFound.colorConvention;
       } else {
         this.aocColor = '';
       }
+    },
+    onClear() {
+      this.defaultCompetency();
+      this.aocColor = '';
+    },
+    onSaveCompetency() {
+      if (this.getCompetency._id !== '') {
+        console.log('updating competency...')
+        this.updateCompetency(this.getCompetency);
+      } else {
+        console.log('Creating competency...');
+        this.createCompetency(this.getCompetency);
+      }
+      this.onClear();
     }
   }
 }

@@ -1,4 +1,4 @@
-import areasOfConcern from "@/api/areas_of_concern";
+import areasOfConcern from "@/api/areas-of-concern-api";
 //import router from "@/router";
 
 const state = () => ({
@@ -9,7 +9,8 @@ const state = () => ({
         _id: '',
         name: '',
         description: '',
-        colorConvention: ''
+        colorConvention: '',
+        order: ''
     }
 });
 
@@ -85,7 +86,8 @@ const mutations = {
             _id: '',
             name: '',
             description: '',
-            colorConvention: ''
+            colorConvention: '',
+            order: ''
         };
     },
     setInfoMessage(state, payload) {

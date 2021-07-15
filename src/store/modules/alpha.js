@@ -1,4 +1,4 @@
-import alpha from "@/api/alphas";
+import alpha from "@/api/alphas-api";
 
 const state = () => ({
     infoMessage: '',
@@ -11,19 +11,13 @@ const state = () => ({
         briefDescription: '',
         description: '',
         isKernel: null,
-        areaOfConcern: null,
+        areaOfConcern: {
+            _id: null
+        },
         owner: '',
-        superAlpha: null
-    },
-    defaultAlpha: {
-        _id: '',
-        name: '',
-        briefDescription: '',
-        description: '',
-        isKernel: null,
-        areaOfConcern: '',
-        owner: '',
-        superAlpha: null
+        superAlpha: {
+            _id: null
+        }
     }
 });
 
@@ -32,6 +26,15 @@ const getters = {
         return state.alpha;
     },
     getAlphas(state) {
+        state.alphas.sort((a, b) => {
+            if(a.areaOfConcern.order < b.areaOfConcern.order){
+                return -1;
+            } else if (a.areaOfConcern.order > b.areaOfConcern.order) {
+                return 1;
+            } else {
+                return 0;
+            }
+        });
         return state.alphas;
     },
     getSelectedAOC(state) {
@@ -51,7 +54,9 @@ const actions = {
             .then(() => {
                 commit('setInfoMessage', 'Alpha created');
                 dispatch('fetchAllAlphas');
-                dispatch('fetchAllPracticeAlphas', data.owner);
+                if (data.owner !== '') {
+                    dispatch('fetchAllPracticeAlphas', data.owner);
+                }
             }).catch(e => {
                 commit('setErrorMessage', e.response.data.errors[0])
             }
@@ -108,9 +113,13 @@ const mutations = {
             briefDescription: '',
             description: '',
             isKernel: payload ? null : true,
-            areaOfConcern: null,
+            areaOfConcern: {
+                _id: null
+            },
             owner: '',
-            superAlpha: null
+            superAlpha: {
+                _id: null
+            }
         }
     },
     setAOC(state, payload) {

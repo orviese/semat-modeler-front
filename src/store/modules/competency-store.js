@@ -1,91 +1,88 @@
-import activitySpaceApi from '@/api/activity-space-api';
+import competencyApi from '@/api/competencies-api';
 
 const state = () => ({
     infoMessage: '',
     errorMessage: '',
-    activitySpaces: [],
-    activitySpace: {
+    competencies: [],
+    competency: {
         _id: '',
         name: '',
         briefDescription: '',
         description: '',
-        isKernel: null,
-        areaOfConcern: null,
-        owner: '',
-    },
-    activitySpaceToEdit: {
-        _id: '',
-        name: '',
-        briefDescription: '',
-        description: '',
-        isKernel: null,
+        isKernel: true,
         areaOfConcern: null,
         owner: '',
     }
 });
 
 const getters = {
-    getActivitySpaces(state) {
-        return state.activitySpaces;
+    getCompetencies(state) {
+        return state.competencies;
     },
-    getActivitySpace(state) {
-        return state.activitySpace;
+    getCompetency(state) {
+        return state.competency;
     }
 }
 const actions = {
-    defaultActivitySpace({commit}) {
-        commit('defaultActivitySpace')
+    defaultCompetency({commit}) {
+        commit('defaultCompetency')
     },
-    updateActivitySpace({commit, dispatch}, data) {
-        activitySpaceApi.updateActivitySpace(data)
+    updateCompetency({commit, dispatch}, data) {
+        competencyApi.updateCompetency(data)
             .then(() => {
-                commit('defaultActivitySpace');
-                dispatch('fetchAllActivitySpaces');
+                commit('defaultCompetency');
+                dispatch('fetchAllCompetencies');
             })
             .catch(err => {
-                console.error(err.response.data.errors[0])
+                if (err.response.status !== 401) {
+                    console.error(err.response.data.errors[0]);
+                }
             })
     },
-    createActivitySpace({commit, dispatch}, data) {
-        activitySpaceApi.createActivitySpace(data)
+    createCompetency({commit, dispatch}, data) {
+        competencyApi.createCompetency(data)
             .then(() => {
-                commit('defaultActivitySpace');
-                dispatch('fetchAllActivitySpaces');
+                commit('defaultCompetency');
+                dispatch('fetchAllCompetencies');
             })
             .catch(err => {
-                console.error(err.response.data.errors[0])
+                if (err.response.status !== 401) {
+                    console.error(err.response.data.errors[0]);
+                }
             })
     },
-    async fetchAllActivitySpaces({commit}) {
-        activitySpaceApi.fetchAllActivitySpaces()
+    async fetchAllCompetencies({commit}) {
+        competencyApi.fetchAllCompetencies()
             .then(response => {
-                commit('setActivitySpaces', response.data.activitySpaces);
+                commit('setCompetencies', response.data.competencies);
             })
             .catch(err => {
-                console.error(err.response.data.errors[0])
+                if (err.response.status !== 401) {
+                    console.error(err.response.data.errors[0])
+                }
             });
     },
-    setSelectedActivitySpace({commit}, data) {
-        commit('setActivitySpace', data)
+    setSelectedCompetency({commit}, data) {
+        commit('setCompetency', data)
     }
 }
 const mutations = {
-    defaultActivitySpace(state) {
-        state.activitySpace = {
+    defaultCompetency(state) {
+        state.competency = {
             _id: '',
             name: '',
             briefDescription: '',
             description: '',
-            isKernel: null,
+            isKernel: true,
             areaOfConcern: null,
             owner: ''
         }
     },
-    setActivitySpaces(state, payload) {
-        state.activitySpaces = payload;
+    setCompetencies(state, payload) {
+        state.competencies = payload;
     },
-    setActivitySpace(state, payload) {
-        state.activitySpace = payload;
+    setCompetency(state, payload) {
+        state.competency = payload;
     },
     setInfoMessage(state, payload) {
         state.infoMessage = payload;

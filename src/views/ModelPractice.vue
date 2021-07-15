@@ -1,11 +1,11 @@
 <template>
   <div class="container">
     <b-alert class="mt-3"
-        :show="dismissCountDown"
-        dismissible
-        :variant="getErrorMessage === '' ? 'success' : 'danger'"
-        @dismissed="dismissCountDown=0"
-        @dismiss-count-down="countDownChanged"
+             :show="dismissCountDown"
+             dismissible
+             :variant="getErrorMessage === '' ? 'success' : 'danger'"
+             @dismissed="dismissCountDown=0"
+             @dismiss-count-down="countDownChanged"
     >
       {{ alertMessage }}
     </b-alert>
@@ -20,10 +20,14 @@
           </b-thead>
           <b-tbody>
             <b-tr v-for="practice in getPractices" :key="practice._id">
-              <b-td>{{practice.name}}</b-td>
-              <b-td>{{practice.objective}}</b-td>
-              <b-td>{{practice.tags}}</b-td>
-              <b-td><b-button variant="info" @click="onPracticeEdit(practice)"><b-icon-pencil></b-icon-pencil></b-button></b-td>
+              <b-td>{{ practice.name }}</b-td>
+              <b-td>{{ practice.objective }}</b-td>
+              <b-td>{{ practice.tags }}</b-td>
+              <b-td>
+                <b-button variant="info" @click="onPracticeEdit(practice)">
+                  <b-icon-pencil></b-icon-pencil>
+                </b-button>
+              </b-td>
             </b-tr>
           </b-tbody>
         </b-table-simple>
@@ -37,7 +41,8 @@
             <b-button squared class="float-right mr-3" @click="onNewPractice">New</b-button>
           </b-form-group>
           <b-form-group label-cols="2" label="Practice Name" label-class="font-weight-bold" class="color-font">
-            <b-form-input required v-model="getPractice.name" placeholder="Software development practice"></b-form-input>
+            <b-form-input required v-model="getPractice.name"
+                          placeholder="Software development practice"></b-form-input>
           </b-form-group>
           <b-form-group label="Objective" label-class="font-weight-bold"
                         description="The objective of this Practice, expressed as a concise and isolated phrase. The content of this attribute should be an explicit and short statement that describes the goal that the practice pursues.">
@@ -53,7 +58,8 @@
           <b-form-group label="Resources" label-class="font-weight-bold"
                         description="Enter desired tags separated by comma ','">
             <b-form-tags
-                input-id="tags-resource"  tag-class="font-weight-bold" tag-pills size="md" tag-variant="info" separator=","
+                input-id="tags-resource" tag-class="font-weight-bold" tag-pills size="md" tag-variant="info"
+                separator=","
                 v-model="getPractice.resources" placeholder="">
             </b-form-tags>
           </b-form-group>
@@ -61,7 +67,8 @@
           <b-form-group label="Properties" label-class="font-weight-bold"
                         description="Enter desired properties separated by comma ','">
             <b-form-tags
-                input-id="tags-properties"  tag-class="font-weight-bold" tag-pills size="md" tag-variant="info" separator=","
+                input-id="tags-properties" tag-class="font-weight-bold" tag-pills size="md" tag-variant="info"
+                separator=","
                 v-model="getPractice.properties" placeholder="">
             </b-form-tags>
           </b-form-group>
@@ -69,7 +76,8 @@
           <b-form-group label="Measures" label-class="font-weight-bold"
                         description="Enter desired tags separated by comma ','">
             <b-form-tags
-                input-id="tags-measures"  tag-class="font-weight-bold" tag-pills size="md" tag-variant="info" separator=","
+                input-id="tags-measures" tag-class="font-weight-bold" tag-pills size="md" tag-variant="info"
+                separator=","
                 v-model="getPractice.measures" placeholder="">
             </b-form-tags>
           </b-form-group>
@@ -77,7 +85,7 @@
           <b-form-group label="Entries" label-class="font-weight-bold"
                         description="Enter desired tags separated by comma ','">
             <b-form-tags
-                input-id="tags-entry"  tag-class="font-weight-bold" tag-pills size="md" tag-variant="info" separator=","
+                input-id="tags-entry" tag-class="font-weight-bold" tag-pills size="md" tag-variant="info" separator=","
                 v-model="getPractice.entry" placeholder="">
             </b-form-tags>
           </b-form-group>
@@ -85,7 +93,7 @@
           <b-form-group label="Results" label-class="font-weight-bold"
                         description="Enter desired tags separated by comma ','">
             <b-form-tags
-                input-id="tags-result"  tag-class="font-weight-bold" tag-pills size="md" tag-variant="info" separator=","
+                input-id="tags-result" tag-class="font-weight-bold" tag-pills size="md" tag-variant="info" separator=","
                 v-model="getPractice.result" placeholder="">
             </b-form-tags>
           </b-form-group>
@@ -97,18 +105,21 @@
                       label-class="font-weight-bold"
                       description="Things to work with">
           <b-input-group>
-            <b-form-select v-model="alphaPracticeSelected" :options="getPracticeAlphas" text-field="name" value-field="_id">
+            <b-form-select v-model="alphaPracticeSelected" :options="getPracticeAlphas" text-field="name"
+                           value-field="_id">
               <template #first>
                 <b-form-select-option :value="null" disabled>-- Please select an alpha --</b-form-select-option>
               </template>
             </b-form-select>
             <b-input-group-append class="ml-2">
-              <b-button @click="addAlphaToPractice" :disabled="alphaPracticeSelected === null" size="sm" variant="info">Add</b-button>
+              <b-button @click="addAlphaToPractice" :disabled="alphaPracticeSelected === null" size="sm" variant="info">
+                Add
+              </b-button>
               <b-button @click="$bvModal.show('new-alpha')" size="sm" variant="success" class="ml-2">New</b-button>
             </b-input-group-append>
           </b-input-group>
           <b-table-simple small striped class="mt-3">
-            <b-thead>
+            <b-thead head-variant="dark">
               <b-tr>
                 <b-th>Name</b-th>
                 <b-th>Description</b-th>
@@ -117,61 +128,41 @@
             </b-thead>
             <b-tbody>
               <b-tr v-for="alpha in getPractice.ownedElements.alphas" :key="alpha._id">
-                <b-td>{{alpha.name}}</b-td>
-                <b-td>{{alpha.description}}</b-td>
+                <b-td>{{ alpha.name }}</b-td>
+                <b-td>{{ alpha.description }}</b-td>
                 <b-td v-bind:style="{backgroundColor: findAreaOfConcernColor(alpha.areaOfConcern)}">
-                  {{findAreaOfConcernName(alpha.areaOfConcern)}}
+                  {{ findAreaOfConcernName(alpha.areaOfConcern) }}
                 </b-td>
-                <b-td><b-button @click="onRemoveAlphaFromPractice(alpha)" variant="danger" size="sm"><b-icon-trash></b-icon-trash></b-button></b-td>
+                <b-td>
+                  <b-button @click="onRemoveAlphaFromPractice(alpha)" variant="danger" size="sm">
+                    <b-icon-trash></b-icon-trash>
+                  </b-button>
+                </b-td>
               </b-tr>
             </b-tbody>
           </b-table-simple>
         </b-form-group>
       </b-tab>
       <b-tab title="Work products" :title-link-class="linkTabClass(3)">
-        <b-form-group
-            class="shadow p-3 mb-5 bg-white rounded border border-info p-2"
-            label="Work products"
-            description="Activity result that describes an alpha"
-            label-class="font-weight-bold">
-          <b-form-group label="Work Product" label-cols="3">
-            <b-input-group>
-              <b-form-select v-model="workProduct" :options="workProducts">
-              </b-form-select>
-              <b-input-group-append class="ml-2">
-                <b-button size="sm" variant="info">Add</b-button>
-                <b-button size="sm" variant="success" class="ml-2">New</b-button>
-              </b-input-group-append>
-            </b-input-group>
-          </b-form-group>
-          <b-form-group>
-            <b-table-simple small striped hover class="mt-2">
-              <b-thead head-variant="dark">
-                <b-tr>
-                  <b-th>Work Product</b-th>
-                  <b-th>Description</b-th>
-                  <b-th></b-th>
-                </b-tr>
-              </b-thead>
-              <b-tbody>
-                <b-tr>
-                  <b-td>Test Case</b-td>
-                  <b-td></b-td>
-                  <b-td>
-                    <b-button variant="danger" size="sm">
-                      <b-icon-trash></b-icon-trash>
-                    </b-button>
-                  </b-td>
-                </b-tr>
-                <b-tr>
-                  <b-td>Test Case</b-td>
-                  <b-td></b-td>
-                  <b-td></b-td>
-                </b-tr>
-              </b-tbody>
-            </b-table-simple>
-          </b-form-group>
-        </b-form-group>
+        <work-product></work-product>
+        <b-table-simple small striped hover responsive="md" class="mt-2">
+          <b-thead head-variant="dark">
+            <b-tr>
+              <b-th>Work Product</b-th>
+              <b-th>Description</b-th>
+              <b-th></b-th>
+            </b-tr>
+          </b-thead>
+          <b-tbody>
+            <b-tr v-for="workProduct in getPractice.ownedElements.workProducts" v-bind:key="workProduct._id">
+              <b-td v-text="workProduct.name"></b-td>
+              <b-td v-text="workProduct.description"></b-td>
+              <b-td>
+                <b-button @click="setSelectedWorkProduct(workProduct)" variant="warning" size="sm" squared><b-icon-pencil></b-icon-pencil></b-button>
+              </b-td>
+            </b-tr>
+          </b-tbody>
+        </b-table-simple>
       </b-tab>
 
       <b-tab title="Work product manifest" :title-link-class="linkTabClass(4)">
@@ -358,9 +349,11 @@
 <script>
 import {mapActions, mapGetters} from 'vuex'
 import Alpha from "@/components/Alpha";
+import WorkProduct from "@/components/WorkProduct";
+
 export default {
   name: "ModelPractice",
-  components: {Alpha},
+  components: {WorkProduct, Alpha},
   data() {
     return {
       dismissSecs: 5,
@@ -400,16 +393,17 @@ export default {
     }
   },
   computed: {
-    ...mapGetters('practice', ['getPractice', 'getPractices','getErrorMessage', 'getInfoMessage']),
+    ...mapGetters('practice', ['getPractice', 'getPractices', 'getErrorMessage', 'getInfoMessage']),
     ...mapGetters('alpha', ['getPracticeAlphas']),
     ...mapGetters('areaOfConcern', ['getAllAreasOfConcern'])
   },
   methods: {
     ...mapActions('practice',
         ['create', 'updatePractice', 'fetchAvailablePractices', 'removeAlphaFromPractice',
-          'setPracticeToEdit', 'defaultPractice', 'addAlphaPractice']),
+          'setPracticeToEdit', 'defaultPractice', 'addAlphaPractice', 'updateWorkProduct']),
     ...mapActions('alpha', ['fetchAllPracticeAlphas']),
     ...mapActions('areaOfConcern', ['fetchAllAreasOfConcern']),
+    ...mapActions('workProduct', ['defaultWorkProduct', 'setSelectedWorkProduct']),
     findAreaOfConcernColor(areaOfConcernId) {
       let foundAC = this.getAllAreasOfConcern.find(e => e._id === areaOfConcernId);
       if (foundAC) {
@@ -466,7 +460,6 @@ export default {
       }
     },
     async onPracticeEdit(practice) {
-      console.log(practice)
       this.tabIndex = 1;
       await this.setPracticeToEdit(practice);
     },
@@ -475,15 +468,19 @@ export default {
         let alpha = this.getPracticeAlphas.find(e => e._id === this.alphaPracticeSelected);
         console.log('Alpha to add .... ' + JSON.stringify(alpha));
         //if (!alpha.isKernel) {
-          await this.addAlphaPractice({
-            name: alpha.name,
-            description: alpha.description,
-            areaOfConcern: alpha.areaOfConcern,
-            parent: alpha.isKernel ? '' : alpha.superAlpha,
-            isKernel: alpha.isKernel
-          });
+        await this.addAlphaPractice({
+          name: alpha.name,
+          description: alpha.description,
+          areaOfConcern: alpha.areaOfConcern,
+          parent: alpha.isKernel ? '' : alpha.superAlpha,
+          isKernel: alpha.isKernel
+        });
         //}
       }
+    },
+    async onEditWorkProduct(workProduct) {
+      await this.updateWorkProduct(workProduct);
+      this.defaultWorkProduct();
     }
   },
   created() {

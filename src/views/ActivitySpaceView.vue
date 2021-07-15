@@ -17,8 +17,10 @@
           <b-td>{{ae.name}}</b-td>
           <b-td>{{ae.description}}</b-td>
           <b-td>{{ae.isKernel}}</b-td>
-          <b-td v-bind:style="{backgroundColor: findActivitySpaceAreaOfConcernColor(ae.areaOfConcern)}"></b-td>
-          <b-td><b-button @click="setSelectedActivitySpace(ae)" variant="warning"><b-icon-pencil></b-icon-pencil></b-button></b-td>
+          <b-td  v-text="findActivitySpaceAreaOfConcernName(ae.areaOfConcern)"
+                 v-bind:style="{backgroundColor: findActivitySpaceAreaOfConcernColor(ae.areaOfConcern)}">
+          </b-td>
+          <b-td><b-button squared size="sm" @click="setSelectedActivitySpace(ae)" variant="warning"><b-icon-pencil></b-icon-pencil></b-button></b-td>
         </b-tr>
       </b-tbody>
     </b-table-simple>
@@ -51,6 +53,14 @@ export default {
       let found = this.getAllAreasOfConcern.find(e => e._id === areaOfConcernId);
       if (found) {
         return found.colorConvention;
+      } else {
+        return  '';
+      }
+    },
+    findActivitySpaceAreaOfConcernName(areaOfConcernId) {
+      let found = this.getAllAreasOfConcern.find(e => e._id === areaOfConcernId);
+      if (found) {
+        return found.name;
       } else {
         return  '';
       }

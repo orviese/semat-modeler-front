@@ -30,5 +30,13 @@ export default {
     removeAlphaPractice(practice, alpha) {
         return this.execute('delete',
             `/practices/${practice}/owned-element/alpha/${alpha}`, null, {});
+    },
+    addPracticeWorkProduct(practice, workProduct) {
+        return this.execute('post',
+            `/practices/${practice}/work-product`, workProduct, {});
+    },
+    updatePracticeWorkProduct(workProduct) {
+        return this.execute('put',
+            `/practices/work-product`, workProduct, {});
     }
 }

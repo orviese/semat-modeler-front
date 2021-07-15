@@ -15,7 +15,10 @@
         <b-form-input required v-model="getSelectedAreaOfConcern.colorConvention" type="color">
         </b-form-input>
       </b-form-group>
-      <b-button type="submit" variant="outline-secondary">Save</b-button>
+      <b-form-group>
+        <b-form-input v-model="getSelectedAreaOfConcern.order" required placeholder="Index to order colors" type="number"></b-form-input>
+      </b-form-group>
+      <b-button  type="submit" variant="outline-success">Save</b-button>
       <b-button class="ml-2" type="reset" variant="outline-dark">Clear</b-button>
     </b-form>
   </b-container>

@@ -31,7 +31,7 @@
           <b-form-select :required="getAlpha.isKernel !== null && getAlpha.isKernel" @change="getColor"
                          value-field="_id"
                          text-field="name"
-                         v-model="getAlpha.areaOfConcern"
+                         v-model="getAlpha.areaOfConcern._id"
                          :options="getAllAreasOfConcern">
             <template #first>
               <b-form-select-option :value="null" disabled>-- Please select an area of concern --</b-form-select-option>
@@ -48,7 +48,7 @@
                     v-if="null !== getAlpha.isKernel
                     && !getAlpha.isKernel" label-class="font-weight-bold">
         <b-form-select :required="getAlpha.isKernel === false && includeSuperAlpha === true"
-                       v-model="getAlpha.superAlpha"
+                       v-model="getAlpha.superAlpha._id"
                        value-field="_id"
                        text-field="name"
                        :options="getKernelAlphas">
@@ -95,9 +95,9 @@ export default {
     },
     async onSave() {
       if (this.getAlpha.superAlpha !== null) {
-        let superAlpha = this.getAlphas.find(e => e._id === this.getAlpha.superAlpha);
+        let superAlpha = this.getAlphas.find(e => e._id === this.getAlpha.superAlpha._id);
         if (superAlpha !== null && superAlpha !== undefined) {
-          this.getAlpha.areaOfConcern = superAlpha.areaOfConcern;
+          this.getAlpha.areaOfConcern._id = superAlpha.areaOfConcern._id;
         }
       }
       if (this.getAlpha._id === null || this.getAlpha._id === '') {

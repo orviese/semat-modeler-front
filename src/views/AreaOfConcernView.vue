@@ -16,10 +16,9 @@
         <b-tr v-for="aoc in getAllAreasOfConcern" :key="aoc._id">
           <b-td>{{ aoc.name }}</b-td>
           <b-td>{{ aoc.description}}</b-td>
-          <b-td v-bind:style="{backgroundColor: aoc.colorConvention}"
-                style="color: white">{{aoc.colorConvention}}</b-td>
-          <b-td><b-button @click="onDelete(aoc)" size="sm" variant="danger"><b-icon-trash></b-icon-trash></b-button></b-td>
-          <b-td><b-button @click="onEdit(aoc)" size="sm" variant="warning"><b-icon-pencil></b-icon-pencil></b-button></b-td>
+          <b-td v-bind:style="{backgroundColor: aoc.colorConvention}">{{aoc.colorConvention}}</b-td>
+          <b-td><b-button @click="onDelete(aoc)" size="sm" squared variant="danger"><b-icon-trash></b-icon-trash></b-button></b-td>
+          <b-td><b-button @click="onEdit(aoc)" size="sm" squared variant="warning"><b-icon-pencil></b-icon-pencil></b-button></b-td>
         </b-tr>
       </b-tbody>
     </b-table-simple>
@@ -40,7 +39,8 @@ export default {
         id: '',
         name: '',
         description: '',
-        colorConvention: ''
+        colorConvention: '',
+        order: null
       }]
     }
   },

@@ -1,10 +1,10 @@
-import practiceService from "@/api/practices";
+import practiceService from "@/api/practices-api";
 import router from "@/router";
 
 const state = () => ({
     practices: [],
     practice: {
-        id: '',
+        _id: '',
         name: '',
         objective: '',
         tags: [],
@@ -14,19 +14,9 @@ const state = () => ({
         entry: [],
         result: [],
         ownedElements: {
-            alphas: []
+            alphas: [],
+            workProducts: []
         }
-    },
-    defaultPractice: {
-        _id: '',
-        name: '',
-        objective: '',
-        tags: [],
-        resources: [],
-        properties: [],
-        measures: [],
-        entry: [],
-        result: []
     },
     errorMessage: '',
     infoMessage: ''
@@ -52,8 +42,7 @@ const actions = {
         try {
             console.log('trying to create a practice...', practice);
             let practiceCreated = await practiceService.createPractice(practice);
-            console.log(practiceCreated.data);
-            commit('setPractice', practiceCreated.data);
+            commit('refreshPractice', practiceCreated.data);
             commit('setInfoMessage', 'Practice created.');
         } catch (e) {
             if (e.response !== null) {
@@ -72,8 +61,7 @@ const actions = {
     async updatePractice({commit}, data) {
         try {
             let practiceUpdated = await practiceService.updatePractice(data);
-            //console.log(practiceUpdated.data)
-            commit('setPractice', practiceUpdated.data);
+            commit('refreshPractice', practiceUpdated.data);
             commit('setInfoMessage', 'Practice updated.');
         } catch (e) {
             commit('setErrorMessage', 'problems when updating practice...');
@@ -91,11 +79,9 @@ const actions = {
         commit('setPracticeToEdit', data);
         commit('setInfoMessage', 'Edit selected practice.')
     },
-
     defaultPractice({commit}) {
-        commit('setPractice');
+        commit('setDefaultPractice');
     },
-
     addAlphaPractice({commit, state}, newAlpha) {
         let payload = {
             practiceId: state.practice._id,
@@ -112,7 +98,6 @@ const actions = {
 
     },
     async removeAlphaFromPractice({commit}, data) {
-        console.log(data.practice, data.alpha);
         practiceService.removeAlphaPractice(data.practice, data.alpha)
             .then(response => {
                 commit('setOwnedAlphas', response.data.alphas);
@@ -120,6 +105,23 @@ const actions = {
             .catch(err => {
                 console.error(err);
             });
+    },
+    async addWorkProduct({commit, state}, data) {
+        practiceService.addPracticeWorkProduct(state.practice._id, data)
+            .then((response) => {
+                commit('refreshPractice', response.data)
+            })
+            .catch(err => {
+                console.error(err);
+            })
+    },
+    async updateWorkProduct({commit}, workProduct) {
+        practiceService.updatePracticeWorkProduct(workProduct)
+            .then(() => {
+                commit('setInfoMessage', 'work product updated');
+            }).catch(error => {
+            console.error(error);
+        });
     }
 }
 
@@ -140,10 +142,10 @@ const mutations = {
         state.practices = payload;
     },
 
-    setPractice(state) {
+    setDefaultPractice(state) {
         console.log('updating practice store')
         state.practice = {
-            id: '',
+            _id: '',
             name: '',
             objective: '',
             tags: [],
@@ -153,7 +155,8 @@ const mutations = {
             entry: [],
             result: [],
             ownedElements: {
-                alphas: []
+                alphas: [],
+                workProducts: []
             }
         }
     },
@@ -163,6 +166,9 @@ const mutations = {
     },
     setOwnedAlphas(state, payload) {
         state.practice.ownedElements.alphas = payload;
+    },
+    refreshPractice(state, payload) {
+        state.practice =  payload;
     }
 }
 

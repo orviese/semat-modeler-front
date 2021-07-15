@@ -1,4 +1,4 @@
-import accountService from "@/api/account";
+import accountService from "@/api/account-api";
 import router from "@/router";
 
 const state = ()=>({
