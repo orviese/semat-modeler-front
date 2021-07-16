@@ -34,6 +34,22 @@ const getters = {
     },
     getInfoMessage(state) {
         return state.infoMessage;
+    },
+    getOwnedAlphas(state) {
+        console.log(state.practice.ownedElements.alphas);
+        return state.practice.ownedElements.alphas.sort((a, b) => {
+            if (a.areaOfConcern !== undefined && b.areaOfConcern !== undefined) {
+                if (a.areaOfConcern.order > b.areaOfConcern.order) {
+                    return 1;
+                } else if (a.areaOfConcern.order > b.areaOfConcern.order) {
+                    return -1;
+                } else {
+                    return 0;
+                }
+            } else {
+                return 0;
+            }
+        })
     }
 }
 
@@ -82,20 +98,14 @@ const actions = {
     defaultPractice({commit}) {
         commit('setDefaultPractice');
     },
-    addAlphaPractice({commit, state}, newAlpha) {
-        let payload = {
-            practiceId: state.practice._id,
-            alpha: newAlpha
-        }
-        practiceService.addAlphaPractice(payload)
+    addAlphaPractice({commit, state}, alphaId) {
+        practiceService.addAlphaPractice(state.practice._id, alphaId)
             .then(response => {
-                console.log(response.data.alphas);
                 commit('setOwnedAlphas', response.data.alphas);
             })
             .catch(err => {
                 console.error(err)
             });
-
     },
     async removeAlphaFromPractice({commit}, data) {
         practiceService.removeAlphaPractice(data.practice, data.alpha)
@@ -168,7 +178,7 @@ const mutations = {
         state.practice.ownedElements.alphas = payload;
     },
     refreshPractice(state, payload) {
-        state.practice =  payload;
+        state.practice = payload;
     }
 }
 

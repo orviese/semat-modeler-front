@@ -105,7 +105,8 @@
                       label-class="font-weight-bold"
                       description="Things to work with">
           <b-input-group>
-            <b-form-select v-model="alphaPracticeSelected" :options="getPracticeAlphas" text-field="name"
+            <b-form-select v-model="alphaPracticeSelected"
+                           :options="getKernelAndPracticeAlphasForSelect" text-field="name"
                            value-field="_id">
               <template #first>
                 <b-form-select-option :value="null" disabled>-- Please select an alpha --</b-form-select-option>
@@ -127,11 +128,11 @@
               </b-tr>
             </b-thead>
             <b-tbody>
-              <b-tr v-for="alpha in getPractice.ownedElements.alphas" :key="alpha._id">
+              <b-tr v-for="alpha in getOwnedAlphas" :key="alpha._id">
                 <b-td>{{ alpha.name }}</b-td>
                 <b-td>{{ alpha.description }}</b-td>
-                <b-td v-bind:style="{backgroundColor: findAreaOfConcernColor(alpha.areaOfConcern)}">
-                  {{ findAreaOfConcernName(alpha.areaOfConcern) }}
+                <b-td v-bind:style="{backgroundColor: alpha.areaOfConcern.colorConvention}">
+                  {{ alpha.areaOfConcern.name }}
                 </b-td>
                 <b-td>
                   <b-button @click="onRemoveAlphaFromPractice(alpha)" variant="danger" size="sm">
@@ -158,96 +159,82 @@
               <b-td v-text="workProduct.name"></b-td>
               <b-td v-text="workProduct.description"></b-td>
               <b-td>
-                <b-button @click="setSelectedWorkProduct(workProduct)" variant="warning" size="sm" squared><b-icon-pencil></b-icon-pencil></b-button>
+                <b-button @click="setSelectedWorkProduct(workProduct)" variant="warning" size="sm" squared>
+                  <b-icon-pencil></b-icon-pencil>
+                </b-button>
               </b-td>
             </b-tr>
           </b-tbody>
         </b-table-simple>
       </b-tab>
-
       <b-tab title="Work product manifest" :title-link-class="linkTabClass(4)">
-        <b-form-group class="shadow p-3 mb-5 bg-white rounded border border-info p-2"
-                      label="Work products manifest"
-                      label-align="left"
-                      label-class="font-weight-bold"
-                      description="Concrete work products representation to describe the alpha">
-          <b-form-group label="Lower Bound" label-cols="3">
-            <b-input></b-input>
+        <b-form
+            @submit.prevent="onSaveWorkProductManifest"
+            @reset.prevent="defaultWorkProduct" class="my-3 mx-3">
+          <b-form-group class="shadow p-3 mb-5 bg-white rounded border border-info p-2"
+                        label="Work products manifest"
+                        label-align=""
+                        label-class="font-weight-bold"
+                        description="Concrete work products representation to describe the alpha">
+            <b-form-group label="">
+              <b-input v-model="getWorkProductManifest.lowerBound" required placeholder="Lower Bound"></b-input>
+            </b-form-group>
+            <b-form-group label="">
+              <b-input v-model="getWorkProductManifest.upperBound" required placeholder="Upper Bound"></b-input>
+            </b-form-group>
+            <b-form-group label=""
+                          description="Alpha bound by this manifest">
+              <b-form-select required v-model="getWorkProductManifest.alpha"
+                             value-field="_id"
+                             text-field="name"
+                             :options="getPractice.ownedElements.alphas">
+                <template #first>
+                  <b-form-select-option :value="null" disabled>-- Please select an alpha --</b-form-select-option>
+                </template>
+              </b-form-select>
+            </b-form-group>
+            <b-form-group label=""
+                          description="Work product bound by this manifest">
+              <b-form-select required v-model="getWorkProductManifest.workProduct"
+                             value-field="_id"
+                             text-field="name"
+                             :options="getPractice.ownedElements.workProducts">
+                <template #first>
+                  <b-form-select-option :value="null" disabled>-- Please select a work product --</b-form-select-option>
+                </template>
+              </b-form-select>
+            </b-form-group>
+            <b-button type="submit" variant="outline-success">Save</b-button>
+            <b-button class="ml-3" type="reset" variant="outline-dark">Clear</b-button>
+            <b-form-group class="mt-3">
+              <b-table-simple small striped responsive="md" hover class="mt-2">
+                <b-thead head-variant="dark">
+                  <b-tr>
+                    <b-th>Alpha</b-th>
+                    <b-th>Work Product</b-th>
+                    <b-th>Lower Bound</b-th>
+                    <b-th>Upper Bound</b-th>
+                    <b-th></b-th>
+                  </b-tr>
+                </b-thead>
+                <b-tbody>
+                  <b-tr v-for="wpm in getAllWorkProductManifests" v-bind:key="wpm._id">
+                    <b-td v-text="wpm.alpha.name"></b-td>
+                    <b-td v-text="wpm.workProduct.name"></b-td>
+                    <b-td v-text="wpm.lowerBound"></b-td>
+                    <b-td v-text="wpm.upperBound"></b-td>
+                    <b-td>
+                      <b-button @click="onRemoveWorkProductManifest(wpm)"
+                                squared size="sm" variant="danger">
+                        <b-icon-trash></b-icon-trash>
+                      </b-button>
+                    </b-td>
+                  </b-tr>
+                </b-tbody>
+              </b-table-simple>
+            </b-form-group>
           </b-form-group>
-          <b-form-group label="Upper Bound" label-cols="3">
-            <b-input></b-input>
-          </b-form-group>
-          <b-form-group label="Alpha" label-cols="3"
-                        description="Alpha bound by this manifest">
-            <b-form-select v-model="workProduct" :options="workProducts">
-            </b-form-select>
-          </b-form-group>
-          <b-form-group label="Work Product" label-cols="3"
-                        description="Work product bound by this manifest">
-            <b-form-select v-model="workProduct" :options="workProducts">
-            </b-form-select>
-          </b-form-group>
-          <b-form-group>
-            <b-button variant="info">Add</b-button>
-          </b-form-group>
-
-          <b-form-group>
-            <b-table-simple small striped class="mt-2">
-              <b-thead>
-                <b-tr>
-                  <b-th>Alpha</b-th>
-                  <b-th>Work Product</b-th>
-                  <b-th>Lower Bound</b-th>
-                  <b-th>Upper Bound</b-th>
-                  <b-th></b-th>
-                </b-tr>
-              </b-thead>
-              <b-tbody>
-                <b-tr>
-                  <b-td>Stakeholders</b-td>
-                  <b-td>UAT</b-td>
-                  <b-td>0</b-td>
-                  <b-td>1</b-td>
-                  <b-td>
-                    <b-button-group>
-
-                    </b-button-group>
-                  </b-td>
-                </b-tr>
-                <b-tr>
-                  <b-td>Solution</b-td>
-                  <b-td></b-td>
-                  <b-td></b-td>
-                  <b-td></b-td>
-                  <b-td></b-td>
-                  <b-td></b-td>
-                  <b-td></b-td>
-                </b-tr>
-                <b-tr style="">
-                  <b-td>Endeavor</b-td>
-                  <b-td></b-td>
-                  <b-td></b-td>
-                  <b-td></b-td>
-                  <b-td></b-td>
-                </b-tr>
-                <b-tr>
-                  <b-td>Endeavor</b-td>
-                  <b-td></b-td>
-                  <b-td></b-td>
-                  <b-td></b-td>
-                  <b-td></b-td>
-                </b-tr>
-                <b-tr>
-                  <b-td>Endeavor</b-td>
-                  <b-td></b-td>
-                  <b-td></b-td>
-                  <b-td></b-td>
-                  <b-td></b-td>
-                </b-tr>
-              </b-tbody>
-            </b-table-simple>
-          </b-form-group>
-        </b-form-group>
+        </b-form>
       </b-tab>
 
       <b-tab title="Activities" :title-link-class="linkTabClass(5)">
@@ -393,9 +380,11 @@ export default {
     }
   },
   computed: {
-    ...mapGetters('practice', ['getPractice', 'getPractices', 'getErrorMessage', 'getInfoMessage']),
-    ...mapGetters('alpha', ['getPracticeAlphas']),
-    ...mapGetters('areaOfConcern', ['getAllAreasOfConcern'])
+    ...mapGetters('practice', ['getPractice', 'getPractices', 'getErrorMessage', 'getInfoMessage',
+      'getOwnedAlphas']),
+    ...mapGetters('alpha', ['getKernelAndPracticeAlphasForSelect']),
+    ...mapGetters('areaOfConcern', ['getAllAreasOfConcern']),
+    ...mapGetters('workProductManifest', ['getAllWorkProductManifests', 'getWorkProductManifest'])
   },
   methods: {
     ...mapActions('practice',
@@ -404,20 +393,9 @@ export default {
     ...mapActions('alpha', ['fetchAllPracticeAlphas']),
     ...mapActions('areaOfConcern', ['fetchAllAreasOfConcern']),
     ...mapActions('workProduct', ['defaultWorkProduct', 'setSelectedWorkProduct']),
-    findAreaOfConcernColor(areaOfConcernId) {
-      let foundAC = this.getAllAreasOfConcern.find(e => e._id === areaOfConcernId);
-      if (foundAC) {
-        return foundAC.colorConvention;
-      }
-      return '';
-    },
-    findAreaOfConcernName(areaOfConcernId) {
-      let foundAC = this.getAllAreasOfConcern.find(e => e._id === areaOfConcernId);
-      if (foundAC) {
-        return foundAC.name;
-      }
-      return 'NOT FOUND';
-    },
+    ...mapActions('workProductManifest',
+        ['fetchAllWorkProductManifests', 'defaultWorkProduct',
+          'defaultWorkProductManifests', 'createWorkProductManifest', 'deleteWorkProductManifest']),
     onRemoveAlphaFromPractice(alpha) {
       this.removeAlphaFromPractice({
         practice: this.getPractice._id,
@@ -445,6 +423,7 @@ export default {
     },
     onNewPractice() {
       this.defaultPractice();
+      this.defaultWorkProductManifests();
     },
     linkTabClass(index) {
       if (this.tabIndex === index) {
@@ -455,39 +434,35 @@ export default {
 
     },
     onTabSelectionChange(newTabIndex) {
-      if (newTabIndex === 2) {
+      if (newTabIndex === 2 && this.getPractice._id !== '') {
         this.fetchAllPracticeAlphas(this.getPractice._id);
       }
     },
     async onPracticeEdit(practice) {
       this.tabIndex = 1;
+      this.defaultWorkProductManifests();
       await this.setPracticeToEdit(practice);
+      this.fetchAllWorkProductManifests(practice._id);
     },
     async addAlphaToPractice() {
       if (this.tabIndex === 2 && this.alphaPracticeSelected !== null) {
-        let alpha = this.getPracticeAlphas.find(e => e._id === this.alphaPracticeSelected);
-        console.log('Alpha to add .... ' + JSON.stringify(alpha));
+        //let alpha = this.getPracticeAlphas.find(e => e._id === this.alphaPracticeSelected);
+        console.log('Alpha to add .... ' + JSON.stringify(this.alphaPracticeSelected));
         //if (!alpha.isKernel) {
-        await this.addAlphaPractice({
-          name: alpha.name,
-          description: alpha.description,
-          areaOfConcern: alpha.areaOfConcern,
-          parent: alpha.isKernel ? '' : alpha.superAlpha,
-          isKernel: alpha.isKernel
-        });
+        await this.addAlphaPractice(this.alphaPracticeSelected);
         //}
       }
     },
-    async onEditWorkProduct(workProduct) {
-      await this.updateWorkProduct(workProduct);
-      this.defaultWorkProduct();
+    async onSaveWorkProductManifest() {
+      if (this.getPractice._id !== '' && this.getPractice._id !== null) {
+        await this.createWorkProductManifest();
+      }
+    },
+    async onRemoveWorkProductManifest(workProductManifest) {
+      await this.deleteWorkProductManifest(workProductManifest);
     }
   },
   created() {
-    console.log('mounted model practice');
-    //this.onLoad();
-  },
-  mounted() {
     this.onLoad();
   }
 }

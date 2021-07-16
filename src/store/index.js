@@ -8,6 +8,7 @@ import alpha from './modules/alpha';
 import activitySpace from './modules/activity-space-store';
 import competency from './modules/competency-store';
 import workProduct from './modules/work-product-store';
+import workProductManifest from './modules/work-product-manifest-store';
 //import * as Cookies from 'js-cookie'
 import SecureLS from "secure-ls";
 const ls = new SecureLS({
@@ -26,7 +27,8 @@ export default function (){
             alpha,
             activitySpace,
             competency,
-            workProduct
+            workProduct,
+            workProductManifest
         },
         plugins: [createPersistedState({
             //paths: ['account', 'practice'],

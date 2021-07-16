@@ -116,6 +116,8 @@ export default {
       this.aoc = this.getAllAreasOfConcern;
       if (!this.includeSuperAlpha) {
         this.getAlpha.isKernel = true;
+      } else {
+        await this.fetchAllAlphas();
       }
     },
     getColor() {

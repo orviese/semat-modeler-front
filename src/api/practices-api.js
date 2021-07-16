@@ -24,8 +24,9 @@ export default {
     fetchAllPractices() {
         return this.execute('get', '/practices', null, {});
     },
-    addAlphaPractice(data) {
-        return this.execute('post', '/practices/owned-element/alpha', data, {});
+    addAlphaPractice(practice, alpha) {
+        return this.execute('post', `/practices/${practice}/owned-element/alpha/${alpha}`,
+            null, {});
     },
     removeAlphaPractice(practice, alpha) {
         return this.execute('delete',
@@ -38,5 +39,17 @@ export default {
     updatePracticeWorkProduct(workProduct) {
         return this.execute('put',
             `/practices/work-product`, workProduct, {});
+    },
+    fetchAllPracticeWorkProductManifests(practiceId) {
+        return this.execute('get',
+            `/practices/${practiceId}/work-product-manifest`, null, {});
+    },
+    addPracticeWorkProductManifest(practiceId, data) {
+        return this.execute('post',
+            `/practices/${practiceId}/work-product-manifest`, data, {});
+    },
+    removePracticeWorkProductManifest(practiceId, wpmId) {
+        return this.execute('delete',
+            `/practices/${practiceId}/work-product-manifest/${wpmId}`, null, {});
     }
 }

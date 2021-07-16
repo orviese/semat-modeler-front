@@ -27,7 +27,7 @@ const getters = {
     },
     getAlphas(state) {
         state.alphas.sort((a, b) => {
-            if(a.areaOfConcern.order < b.areaOfConcern.order){
+            if (a.areaOfConcern.order < b.areaOfConcern.order) {
                 return -1;
             } else if (a.areaOfConcern.order > b.areaOfConcern.order) {
                 return 1;
@@ -42,6 +42,12 @@ const getters = {
     },
     getPracticeAlphas(state) {
         return state.practiceAlphas;
+    },
+    getKernelAndPracticeAlphasForSelect(state) {
+        return [
+            {label: 'Kernel Alphas', options: state.practiceAlphas.filter(alpha => alpha.isKernel)},
+            {label: 'Practice Alphas', options: state.practiceAlphas.filter(alpha => !alpha.isKernel)}
+        ]
     }
 }
 
