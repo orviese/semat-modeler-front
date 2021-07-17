@@ -9,6 +9,9 @@
     >
       {{ alertMessage }}
     </b-alert>
+    <b-form-group>
+      <h5 class="text-center">Editing practice: <strong class="text-success" v-text="getPractice.name"></strong></h5>
+    </b-form-group>
     <b-tabs class="mb-5" v-model="tabIndex" lazy @activate-tab="onTabSelectionChange">
       <b-tab title="Available Practices" :title-link-class="linkTabClass(0)" @click="onLoad">
         <b-table-simple hover striped small bordered class="mt-3">
@@ -219,7 +222,8 @@
                 </b-thead>
                 <b-tbody>
                   <b-tr v-for="wpm in getAllWorkProductManifests" v-bind:key="wpm._id">
-                    <b-td v-text="wpm.alpha.name"></b-td>
+                    <b-td v-bind:style="{backgroundColor: wpm.alpha.areaOfConcern.colorConvention}"
+                          v-text="wpm.alpha.name"></b-td>
                     <b-td v-text="wpm.workProduct.name"></b-td>
                     <b-td v-text="wpm.lowerBound"></b-td>
                     <b-td v-text="wpm.upperBound"></b-td>
@@ -236,22 +240,28 @@
           </b-form-group>
         </b-form>
       </b-tab>
-
       <b-tab title="Activities" :title-link-class="linkTabClass(5)">
-        <b-form-group description="Available activity spaces" label="Activity Spaces" label-class="font-weight-bold"
-                      class="shadow p-3 mb-5 bg-white rounded border border-info p-2">
+        <b-form-group description="Available activity spaces for this practice"
+                      label="Activity Spaces to represent this practice" label-class="font-weight-bold"
+                      class="shadow p-3 mb-3 bg-white rounded border border-info p-2">
           <b-input-group>
             <b-form-select
-                value-field="id"
+                value-field="_id"
                 text-field="name"
-                v-model="activitySpaceSelected" :options="activitySpaces">
+                v-model="activitySpaceSelected" :options="getActivitySpaces">
+              <template #first>
+                <b-form-select-option :value="null" disabled>-- Please select an activity space --
+                </b-form-select-option>
+              </template>
             </b-form-select>
             <b-input-group-append class="ml-2">
-              <b-button variant="info">Add</b-button>
+              <b-button @click="onAddingActivitySpace" :disabled="activitySpaceSelected === null" variant="info">Add
+              </b-button>
             </b-input-group-append>
           </b-input-group>
-          <p class="text-center text-black-50 bg-warning mt-3">Available activity spaces</p>
-          <b-table-simple small striped hover outlined class="mt-3">
+          <p class="text-center text-dark bg-active mt-3">
+            Available activity spaces for this practice to organize activities</p>
+          <b-table-simple small striped hover responsive="md" table-variant="light" class="mt-3">
             <b-thead head-variant="dark">
               <b-tr>
                 <b-th>Activity Space</b-th>
@@ -260,54 +270,73 @@
               </b-tr>
             </b-thead>
             <b-tbody>
-              <b-tr>
-                <b-td>Shape the system</b-td>
-                <b-td></b-td>
-                <b-td></b-td>
-              </b-tr>
-              <b-tr>
-                <b-td>Understand requirements</b-td>
-                <b-td></b-td>
-                <b-td></b-td>
+              <b-tr v-for="activitySpace in getPractice.ownedElements.activitySpaces" :key="activitySpace._id">
+                <b-td v-text="activitySpace.name"></b-td>
+                <b-td
+                    v-bind:style="{backgroundColor: activitySpace.areaOfConcern.colorConvention}"
+                    v-text="activitySpace.areaOfConcern.name"></b-td>
+                <b-td>
+                  <b-button @click="onRemoveActivitySpace" size="sm" squared variant="danger">
+                    <b-icon-trash></b-icon-trash>
+                  </b-button>
+                </b-td>
               </b-tr>
             </b-tbody>
           </b-table-simple>
-          <b-form-group label="Activities" label-class="font-weight-bold" description="Things to do">
-            <b-form-group label="Activity Space that organize the activity">
-              <b-form-select
-                  value-field="id"
-                  text-field="name"
-                  v-model="activitySpaceSelected" :options="activitySpaces"></b-form-select>
-            </b-form-group>
-            <b-form-group label="Activity">
-              <b-input-group>
-                <b-form-select v-model="workProduct" :options="workProducts">
-                </b-form-select>
-                <b-input-group-append class="ml-2">
-                  <b-button variant="info">Add</b-button>
-                </b-input-group-append>
-              </b-input-group>
-            </b-form-group>
-
-            <b-table-simple small striped hover class="mt-3">
-              <b-thead head-variant="dark">
-                <b-tr>
-                  <b-th>Activity</b-th>
-                  <b-th></b-th>
-                  <b-th></b-th>
-                </b-tr>
-              </b-thead>
-              <b-tbody>
-                <b-tr>
-                  <b-td></b-td>
-                  <b-td></b-td>
-                  <b-td></b-td>
-                </b-tr>
-              </b-tbody>
-            </b-table-simple>
-          </b-form-group>
-
         </b-form-group>
+
+        <b-form-group label="Activities" label-class="font-weight-bold" description="Things to do"
+                      class="shadow p-3 bg-white rounded border border-info p-2">
+          <b-form @submit.prevent="">
+            <b-form-group
+                description="Select an activity space to group activities"
+                label="">
+              <b-form-select required
+                  value-field="_id"
+                  text-field="name"
+                  :options="getPractice.ownedElements.activitySpaces"
+                  v-model="activitySpaceSelectedForActivity">
+                <template #first>
+                  <b-form-select-option :value="null" disabled>** Select Activity Space **</b-form-select-option>
+                </template>
+              </b-form-select>
+            </b-form-group>
+            <b-form-group description="Representative name for the activity">
+              <b-form-input required placeholder="Activity Name">
+              </b-form-input>
+            </b-form-group>
+            <b-form-group description="Competency required to accomplish the activity (Optional)">
+              <b-form-checkbox-group size="lg"
+              v-model="selectedCompetencies"
+              :options="getCompetencies"
+              text-field="name"
+              value-field="_id" name="competencies">
+
+              </b-form-checkbox-group>
+            </b-form-group>
+            <b-button type="submit" variant="outline-success">Save</b-button>
+            <b-button class="ml-3" type="reset" variant="outline-dark">Clear</b-button>
+          </b-form>
+
+          <b-table-simple small striped hover responsive="sm" class="mt-3">
+            <b-thead head-variant="dark">
+              <b-tr>
+                <b-th>Activity Space</b-th>
+                <b-th>Activity</b-th>
+                <b-th>Competencies</b-th>
+              </b-tr>
+            </b-thead>
+            <b-tbody>
+              <b-tr v-for="activityAssociation in getPractice.ownedElements.activityAssociations"
+                    :key="activityAssociation._id">
+                <b-td v-text="activityAssociation.end2.name"></b-td>
+                <b-td v-text="activityAssociation.end1.name"></b-td>
+                <b-td v-text="getCompetencyNames(activityAssociation.end1.requiredCompetencyLevel)"></b-td>
+              </b-tr>
+            </b-tbody>
+          </b-table-simple>
+        </b-form-group>
+
 
       </b-tab>
 
@@ -369,14 +398,9 @@ export default {
       workProducts: [],
       alphaPracticeSelected: null,
       alphasSelected: [],
-      activitySpaces: [
-        {id: '1', name: 'Explore possibilities', areaOfConcern: ''},
-        {id: '2', name: 'Understand the requirements', areaOfConcern: ''},
-        {id: '3', name: 'Test the system', areaOfConcern: ''},
-        {id: '4', name: 'Coordinate activity', areaOfConcern: ''},
-        {id: '5', name: 'Support the team', areaOfConcern: ''},
-      ],
-      activitySpaceSelected: null
+      activitySpaceSelected: null,
+      activitySpaceSelectedForActivity: null,
+      selectedCompetencies: []
     }
   },
   computed: {
@@ -384,20 +408,24 @@ export default {
       'getOwnedAlphas']),
     ...mapGetters('alpha', ['getKernelAndPracticeAlphasForSelect']),
     ...mapGetters('areaOfConcern', ['getAllAreasOfConcern']),
-    ...mapGetters('workProductManifest', ['getAllWorkProductManifests', 'getWorkProductManifest'])
+    ...mapGetters('workProductManifest', ['getAllWorkProductManifests', 'getWorkProductManifest']),
+    ...mapGetters('activitySpace', ['getActivitySpaces']),
+    ...mapGetters('competency', ['getCompetencies'])
   },
   methods: {
     ...mapActions('practice',
         ['create', 'updatePractice', 'fetchAvailablePractices', 'removeAlphaFromPractice',
-          'setPracticeToEdit', 'defaultPractice', 'addAlphaPractice', 'updateWorkProduct']),
+          'setPracticeToEdit', 'defaultPractice', 'addAlphaPractice', 'updateWorkProduct',
+          'addActivitySpace']),
     ...mapActions('alpha', ['fetchAllPracticeAlphas']),
     ...mapActions('areaOfConcern', ['fetchAllAreasOfConcern']),
     ...mapActions('workProduct', ['defaultWorkProduct', 'setSelectedWorkProduct']),
     ...mapActions('workProductManifest',
         ['fetchAllWorkProductManifests', 'defaultWorkProduct',
           'defaultWorkProductManifests', 'createWorkProductManifest', 'deleteWorkProductManifest']),
-    onRemoveAlphaFromPractice(alpha) {
-      this.removeAlphaFromPractice({
+    ...mapActions('activitySpace', ['fetchAllActivitySpaces']),
+    async onRemoveAlphaFromPractice(alpha) {
+      await this.removeAlphaFromPractice({
         practice: this.getPractice._id,
         alpha: alpha._id
       });
@@ -437,6 +465,9 @@ export default {
       if (newTabIndex === 2 && this.getPractice._id !== '') {
         this.fetchAllPracticeAlphas(this.getPractice._id);
       }
+      if (newTabIndex === 5) {
+        this.activitySpaceSelected = null;
+      }
     },
     async onPracticeEdit(practice) {
       this.tabIndex = 1;
@@ -455,11 +486,31 @@ export default {
     },
     async onSaveWorkProductManifest() {
       if (this.getPractice._id !== '' && this.getPractice._id !== null) {
-        await this.createWorkProductManifest();
+        await this.createWorkProductManifest(this.getPractice._id);
       }
     },
     async onRemoveWorkProductManifest(workProductManifest) {
       await this.deleteWorkProductManifest(workProductManifest);
+    },
+    async onAddingActivitySpace() {
+      if (this.activitySpaceSelected !== null && this.getPractice._id !== '') {
+        await this.addActivitySpace({
+          practice: this.getPractice._id,
+          activitySpace: this.activitySpaceSelected
+        });
+      }
+    },
+    async onRemoveActivitySpace() {
+
+    },
+    getCompetencyNames(competencies) {
+      const reducer = (accumulator, currentValue) =>  accumulator.name + ', ' +currentValue.name+ ' 3';
+      console.log(competencies.reduce(reducer, '**'));
+      let val = '';
+      competencies.forEach(e => {
+        val += e.name + ', '
+      })
+      return val;
     }
   },
   created() {

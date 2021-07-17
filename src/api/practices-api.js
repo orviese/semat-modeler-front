@@ -51,5 +51,10 @@ export default {
     removePracticeWorkProductManifest(practiceId, wpmId) {
         return this.execute('delete',
             `/practices/${practiceId}/work-product-manifest/${wpmId}`, null, {});
+    },
+    addActivitySpaceToPractice(practice, activitySpace) {
+        return this.execute('post',
+            `/practices/${practice}/owned-element/activity-space/${activitySpace}`,
+            null, {});
     }
 }

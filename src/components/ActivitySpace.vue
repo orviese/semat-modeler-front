@@ -10,7 +10,7 @@
           <b-form-textarea required v-model="getActivitySpace.description" placeholder="Description" rows="3"></b-form-textarea>
         </b-form-group>
         <b-form-group label="Is kernel?" label-cols="2" label-class="font-weight-bold">
-          <b-form-select required v-model="getActivitySpace.isKernel" :options="isKernelOptions">
+          <b-form-select :disabled="!this.includeSuperActivitySpace" required v-model="getActivitySpace.isKernel" :options="isKernelOptions">
             <template #first>
               <b-form-select-option :value="null" disabled>
                 -- Please select an option --
@@ -61,6 +61,10 @@
 import {mapGetters, mapActions} from 'vuex';
 export default {
   name: "ActivitySpace",
+  props: {
+    includeSuperActivitySpace: Boolean,
+    practice: String
+  },
   data() {
     return {
       isKernel: null,
@@ -80,6 +84,9 @@ export default {
       'updateActivitySpace', 'createActivitySpace']),
     async onLoad() {
       await this.fetchAllAreasOfConcern();
+      if (!this.includeSuperActivitySpace){
+        this.getActivitySpace.isKernel = true;
+      }
     },
     onSave() {
       if(this.getActivitySpace._id !== '') {

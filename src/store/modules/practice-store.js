@@ -15,7 +15,9 @@ const state = () => ({
         result: [],
         ownedElements: {
             alphas: [],
-            workProducts: []
+            workProducts: [],
+            activitySpaces: [],
+            activityAssociations: []
         }
     },
     errorMessage: '',
@@ -36,7 +38,7 @@ const getters = {
         return state.infoMessage;
     },
     getOwnedAlphas(state) {
-        console.log(state.practice.ownedElements.alphas);
+        //console.log(state.practice.ownedElements.alphas);
         return state.practice.ownedElements.alphas.sort((a, b) => {
             if (a.areaOfConcern !== undefined && b.areaOfConcern !== undefined) {
                 if (a.areaOfConcern.order > b.areaOfConcern.order) {
@@ -132,6 +134,15 @@ const actions = {
             }).catch(error => {
             console.error(error);
         });
+    },
+    async addActivitySpace({commit}, data) {
+        practiceService.addActivitySpaceToPractice(data.practice, data.activitySpace)
+            .then(response => {
+                commit('refreshPracticeActivitySpaces', response.data.activitySpaces)
+            })
+            .catch(error => {
+                console.error(error);
+            })
     }
 }
 
@@ -166,7 +177,9 @@ const mutations = {
             result: [],
             ownedElements: {
                 alphas: [],
-                workProducts: []
+                workProducts: [],
+                activitySpaces: [],
+                activityAssociations: []
             }
         }
     },
@@ -179,6 +192,9 @@ const mutations = {
     },
     refreshPractice(state, payload) {
         state.practice = payload;
+    },
+    refreshPracticeActivitySpaces(state, payload) {
+        state.practice.ownedElements.activitySpaces = payload;
     }
 }
 

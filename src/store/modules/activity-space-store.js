@@ -26,7 +26,15 @@ const state = () => ({
 
 const getters = {
     getActivitySpaces(state) {
-        return state.activitySpaces;
+        return state.activitySpaces.sort((a, b) => {
+            if (a.areaOfConcern < b.areaOfConcern) {
+                return -1;
+            }else if(a.areaOfConcern > b.areaOfConcern) {
+                return 1;
+            } else {
+                return 0;
+            }
+        });
     },
     getActivitySpace(state) {
         return state.activitySpace;
