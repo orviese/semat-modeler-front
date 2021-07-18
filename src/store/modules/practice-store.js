@@ -17,7 +17,8 @@ const state = () => ({
             alphas: [],
             workProducts: [],
             activitySpaces: [],
-            activityAssociations: []
+            activityAssociations: [],
+            activities: []
         }
     },
     errorMessage: '',
@@ -143,6 +144,34 @@ const actions = {
             .catch(error => {
                 console.error(error);
             })
+    },
+    async removeActivitySpace({commit}, data) {
+        practiceService.removeActivitySpaceToPractice(data.practice, data.activitySpace)
+            .then(response => {
+                commit('refreshPracticeActivitySpaces', response.data.activitySpaces)
+            })
+            .catch(error => {
+                console.error(error);
+            });
+    },
+    async addPracticeActivity({commit}, data) {
+        practiceService.addActivityToPractice(data.practice, data)
+            .then(response => {
+                commit('refreshPractice', response.data)
+            })
+            .catch(error => {
+                console.error(error);
+            })
+    },
+    async removePracticeActivity({commit}, data) {
+        practiceService.removeActivityToPractice(data.practice, data)
+            .then(response => {
+                commit('refreshPracticeActivities', response.data.activities)
+                commit('refreshPracticeActivityAssociations', response.data.activityAssociations)
+            })
+            .catch(error => {
+                console.error(error);
+            })
     }
 }
 
@@ -179,7 +208,8 @@ const mutations = {
                 alphas: [],
                 workProducts: [],
                 activitySpaces: [],
-                activityAssociations: []
+                activityAssociations: [],
+                activities: []
             }
         }
     },
@@ -195,6 +225,12 @@ const mutations = {
     },
     refreshPracticeActivitySpaces(state, payload) {
         state.practice.ownedElements.activitySpaces = payload;
+    },
+    refreshPracticeActivities(state, payload) {
+        state.practice.ownedElements.activities = payload;
+    },
+    refreshPracticeActivityAssociations(state, payload) {
+        state.practice.ownedElements.activityAssociations = payload;
     }
 }
 

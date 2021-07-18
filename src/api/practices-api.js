@@ -56,5 +56,18 @@ export default {
         return this.execute('post',
             `/practices/${practice}/owned-element/activity-space/${activitySpace}`,
             null, {});
-    }
+    },
+    removeActivitySpaceToPractice(practice, activitySpace) {
+        return this.execute('delete',
+            `/practices/${practice}/owned-element/activity-space/${activitySpace}`,
+            null, {});
+    },
+    addActivityToPractice(practice, activityData) {
+        return this.execute('post',
+            `/practices/${practice}/activity`, activityData, {});
+    },
+    removeActivityToPractice(practice, activityData) {
+        return this.execute('delete',
+            `/practices/${practice}/activity/${activityData.activity}`, activityData, {});
+    },
 }

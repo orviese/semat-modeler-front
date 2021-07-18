@@ -276,7 +276,7 @@
                     v-bind:style="{backgroundColor: activitySpace.areaOfConcern.colorConvention}"
                     v-text="activitySpace.areaOfConcern.name"></b-td>
                 <b-td>
-                  <b-button @click="onRemoveActivitySpace" size="sm" squared variant="danger">
+                  <b-button @click="onRemoveActivitySpace(activitySpace)" size="sm" squared variant="danger">
                     <b-icon-trash></b-icon-trash>
                   </b-button>
                 </b-td>
@@ -287,30 +287,30 @@
 
         <b-form-group label="Activities" label-class="font-weight-bold" description="Things to do"
                       class="shadow p-3 bg-white rounded border border-info p-2">
-          <b-form @submit.prevent="">
+          <b-form @submit.prevent="onSavePracticeActivity" @reset.prevent="onClearActivity">
             <b-form-group
                 description="Select an activity space to group activities"
                 label="">
               <b-form-select required
-                  value-field="_id"
-                  text-field="name"
-                  :options="getPractice.ownedElements.activitySpaces"
-                  v-model="activitySpaceSelectedForActivity">
+                             value-field="_id"
+                             text-field="name"
+                             :options="getPractice.ownedElements.activitySpaces"
+                             v-model="activitySpaceSelectedForActivity">
                 <template #first>
                   <b-form-select-option :value="null" disabled>** Select Activity Space **</b-form-select-option>
                 </template>
               </b-form-select>
             </b-form-group>
             <b-form-group description="Representative name for the activity">
-              <b-form-input required placeholder="Activity Name">
+              <b-form-input v-model="activityName" required placeholder="Activity Name">
               </b-form-input>
             </b-form-group>
             <b-form-group description="Competency required to accomplish the activity (Optional)">
               <b-form-checkbox-group size="lg"
-              v-model="selectedCompetencies"
-              :options="getCompetencies"
-              text-field="name"
-              value-field="_id" name="competencies">
+                                     v-model="selectedCompetencies"
+                                     :options="getCompetencies"
+                                     text-field="name"
+                                     value-field="_id" name="competencies">
 
               </b-form-checkbox-group>
             </b-form-group>
@@ -323,23 +323,39 @@
               <b-tr>
                 <b-th>Activity Space</b-th>
                 <b-th>Activity</b-th>
-                <b-th>Competencies</b-th>
+                <b-th>Competencies (Level)</b-th>
+                <b-th></b-th>
               </b-tr>
             </b-thead>
             <b-tbody>
               <b-tr v-for="activityAssociation in getPractice.ownedElements.activityAssociations"
                     :key="activityAssociation._id">
-                <b-td v-text="activityAssociation.end2.name"></b-td>
-                <b-td v-text="activityAssociation.end1.name"></b-td>
+                <b-td v-bind:style="{backgroundColor: activityAssociation.end2.areaOfConcern.colorConvention}"
+                      v-text="activityAssociation.end2.name"></b-td>
+                <b-td v-bind:style="{backgroundColor: activityAssociation.end2.areaOfConcern.colorConvention}"
+                      v-text="activityAssociation.end1.name"></b-td>
+                <!--
                 <b-td v-text="getCompetencyNames(activityAssociation.end1.requiredCompetencyLevel)"></b-td>
+                -->
+                <b-td>
+                  <b-list-group size="sm">
+                    <b-list-group-item size="sm"
+                        class="d-flex justify-content-between align-items-center"
+                        v-for="competency in activityAssociation.end1.requiredCompetencyLevel"
+                        :key="competency._id">
+                      {{ competency.name }}
+                      <b-badge variant="dark" pill>5</b-badge>
+                    </b-list-group-item>
+                  </b-list-group>
+                </b-td>
+                <b-td class="align-items-center">
+                  <b-button @click="onDeletePracticeActivity(activityAssociation)" size="sm" squared variant="danger"><b-icon-trash></b-icon-trash></b-button>
+                </b-td>
               </b-tr>
             </b-tbody>
           </b-table-simple>
         </b-form-group>
-
-
       </b-tab>
-
       <b-tab title="Patterns" :title-link-class="linkTabClass(6)">
 
       </b-tab>
@@ -400,7 +416,8 @@ export default {
       alphasSelected: [],
       activitySpaceSelected: null,
       activitySpaceSelectedForActivity: null,
-      selectedCompetencies: []
+      selectedCompetencies: [],
+      activityName: '',
     }
   },
   computed: {
@@ -416,7 +433,7 @@ export default {
     ...mapActions('practice',
         ['create', 'updatePractice', 'fetchAvailablePractices', 'removeAlphaFromPractice',
           'setPracticeToEdit', 'defaultPractice', 'addAlphaPractice', 'updateWorkProduct',
-          'addActivitySpace']),
+          'addActivitySpace','removeActivitySpace', 'addPracticeActivity', 'removePracticeActivity']),
     ...mapActions('alpha', ['fetchAllPracticeAlphas']),
     ...mapActions('areaOfConcern', ['fetchAllAreasOfConcern']),
     ...mapActions('workProduct', ['defaultWorkProduct', 'setSelectedWorkProduct']),
@@ -500,17 +517,62 @@ export default {
         });
       }
     },
-    async onRemoveActivitySpace() {
-
+    async onRemoveActivitySpace(ownedActivitySpace) {
+      if (this.getPractice._id !== '') {
+        this.deleteAS = false;
+        try {
+          this.deleteAS = await this.$bvModal.msgBoxConfirm(
+              `Are you sure to delete this: ${ownedActivitySpace.name} Activity Space? \n
+              Be cautious if this activity space is already associated with other activities`,
+              {
+                title: 'Please Confirm removal',
+                size: 'sm',
+                buttonSize: 'sm',
+                okVariant: 'danger',
+                okTitle: 'Yes',
+                cancelTitle: 'No',
+                footerClass: 'p-2',
+                hideHeaderClose: false,
+                centered: true
+              })
+          if (this.deleteAS) {
+            console.log('removing ...  AS')
+            await this.removeActivitySpace({
+              practice: this.getPractice._id,
+              activitySpace: ownedActivitySpace._id
+            });
+          }
+        }catch (e) {
+          this.deleteAS = false;
+        }
+      }
     },
-    getCompetencyNames(competencies) {
-      const reducer = (accumulator, currentValue) =>  accumulator.name + ', ' +currentValue.name+ ' 3';
-      console.log(competencies.reduce(reducer, '**'));
-      let val = '';
-      competencies.forEach(e => {
-        val += e.name + ', '
-      })
-      return val;
+    async onSavePracticeActivity() {
+      if (this.getPractice._id !== '') {
+        const data = {
+          practice: this.getPractice._id,
+          activitySpace: this.activitySpaceSelectedForActivity,
+          name: this.activityName,
+          competencies: this.selectedCompetencies
+        }
+        await this.addPracticeActivity(data);
+      }
+    },
+    async onDeletePracticeActivity(activityAssociation) {
+      if (this.getPractice._id !== '') {
+        const data = {
+          practice: this.getPractice._id,
+          activityAssociation: activityAssociation._id,
+          activity: activityAssociation.end1._id
+        }
+        await this.removePracticeActivity(data);
+        this.onClearActivity();
+      }
+    },
+    onClearActivity() {
+      this.activityName = '';
+      this.selectedCompetencies = [];
+      this.activitySpaceSelectedForActivity = null;
     }
   },
   created() {
