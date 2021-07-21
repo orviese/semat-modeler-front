@@ -86,7 +86,7 @@ export default {
               icon: 'fa fa-terminal'
             },
             {
-              href: '/about',
+              href: '/validate-practices',
               title: 'Validate',
               icon: 'fa fa-check-square'
             }

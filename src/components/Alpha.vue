@@ -5,18 +5,17 @@
         <b-form-input v-model="getAlpha.name" type="text" placeholder="Alpha Name" required>
         </b-form-input>
       </b-form-group>
-
       <b-form-group label-class="font-weight-bold">
         <b-form-input v-model="getAlpha.briefDescription" placeholder="Alpha brief description" required>
         </b-form-input>
       </b-form-group>
-
       <b-form-group label-class="font-weight-bold">
-        <b-form-textarea placeholder="More complete description" v-model="getAlpha.description" rows="4" size="sm" required></b-form-textarea>
+        <b-form-textarea placeholder="More complete description" v-model="getAlpha.description" rows="4" size="sm"
+                         required></b-form-textarea>
       </b-form-group>
-
       <b-form-group label="Is kernel?" label-class="font-weight-bold" label-cols="3">
-        <b-form-select v-bind:disabled="!includeSuperAlpha" v-model="getAlpha.isKernel" :options="isKernelOptions" required>
+        <b-form-select
+            v-bind:disabled="!includeSuperAlpha" v-model="getAlpha.isKernel" :options="isKernelOptions" required>
           <template #first>
             <b-form-select-option :value="null" disabled>
               -- Please select an option --
@@ -24,9 +23,10 @@
           </template>
         </b-form-select>
       </b-form-group>
-
-      <b-form-group label-class="font-weight-bold" label="Area or concern" label-cols="3"
-                    v-if="getAlpha.isKernel">
+      <b-form-group
+          label-class="font-weight-bold"
+          label="Area or concern" label-cols="3"
+          v-if="getAlpha.isKernel">
         <b-input-group>
           <b-form-select :required="getAlpha.isKernel !== null && getAlpha.isKernel" @change="getColor"
                          value-field="_id"
@@ -101,7 +101,7 @@ export default {
         }
       }
       if (this.getAlpha._id === null || this.getAlpha._id === '') {
-        if (null !== this.practice &&  '' !== this.practice) {
+        if (null !== this.practice && '' !== this.practice) {
           this.setAlphaOwner(this.practice);
         }
         await this.createAlpha(this.getAlpha);

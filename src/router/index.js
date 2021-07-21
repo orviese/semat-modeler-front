@@ -13,6 +13,7 @@ import AlphaView from "@/views/AlphaView";
 import ActivitySpaceView from "@/views/ActivitySpaceView";
 import ModelPractice from "@/views/ModelPractice";
 import CompetencyView from "@/views/CompetencyView";
+import ValidatePractice from "@/views/ValidatePractice";
 
 Vue.use(VueRouter)
 
@@ -69,6 +70,12 @@ const routes = [
         path: '/model-practices',
         name: 'ModelPractices',
         component: ModelPractice,
+        meta: {secure: true},
+      },
+      {
+        path: '/validate-practices',
+        name: 'ValidatePractices',
+        component: ValidatePractice,
         meta: {secure: true},
       },
       {

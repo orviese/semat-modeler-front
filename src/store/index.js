@@ -9,6 +9,7 @@ import activitySpace from './modules/activity-space-store';
 import competency from './modules/competency-store';
 import workProduct from './modules/work-product-store';
 import workProductManifest from './modules/work-product-manifest-store';
+import validatePractice from './modules/practice-validation-store';
 //import * as Cookies from 'js-cookie'
 import SecureLS from "secure-ls";
 const ls = new SecureLS({
@@ -28,7 +29,8 @@ export default function (){
             activitySpace,
             competency,
             workProduct,
-            workProductManifest
+            workProductManifest,
+            validatePractice
         },
         plugins: [createPersistedState({
             //paths: ['account', 'practice'],

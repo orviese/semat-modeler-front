@@ -284,7 +284,6 @@
             </b-tbody>
           </b-table-simple>
         </b-form-group>
-
         <b-form-group label="Activities" label-class="font-weight-bold" description="Things to do"
                       class="shadow p-3 bg-white rounded border border-info p-2">
           <b-form @submit.prevent="onSavePracticeActivity" @reset.prevent="onClearActivity">
@@ -317,7 +316,6 @@
             <b-button type="submit" variant="outline-success">Save</b-button>
             <b-button class="ml-3" type="reset" variant="outline-dark">Clear</b-button>
           </b-form>
-
           <b-table-simple small striped hover responsive="sm" class="mt-3">
             <b-thead head-variant="dark">
               <b-tr>
@@ -340,16 +338,18 @@
                 <b-td>
                   <b-list-group size="sm">
                     <b-list-group-item size="sm"
-                        class="d-flex justify-content-between align-items-center"
-                        v-for="competency in activityAssociation.end1.requiredCompetencyLevel"
-                        :key="competency._id">
+                                       class="d-flex justify-content-between align-items-center"
+                                       v-for="competency in activityAssociation.end1.requiredCompetencyLevel"
+                                       :key="competency._id">
                       {{ competency.name }}
                       <b-badge variant="dark" pill>5</b-badge>
                     </b-list-group-item>
                   </b-list-group>
                 </b-td>
                 <b-td class="align-items-center">
-                  <b-button @click="onDeletePracticeActivity(activityAssociation)" size="sm" squared variant="danger"><b-icon-trash></b-icon-trash></b-button>
+                  <b-button @click="onDeletePracticeActivity(activityAssociation)" size="sm" squared variant="danger">
+                    <b-icon-trash></b-icon-trash>
+                  </b-button>
                 </b-td>
               </b-tr>
             </b-tbody>
@@ -357,17 +357,81 @@
         </b-form-group>
       </b-tab>
       <b-tab title="Patterns" :title-link-class="linkTabClass(6)">
-
+        <b-form @submit.prevent="onSavePattern" @reset.prevent="onAddingNewPattern" class="mt-5">
+          <b-form-group>
+            <b-form-input v-model="pattern.name" required placeholder="Pattern Name"></b-form-input>
+          </b-form-group>
+          <b-form-group>
+            <b-form-input v-model="pattern.associationName" required placeholder="Pattern Association Name"></b-form-input>
+          </b-form-group>
+          <b-form-group label-class="font-weight-bold" label="Owned elements type for this association.">
+            <b-form-radio-group required v-model="radioSelected">
+              <b-form-radio value="AS">Activity Spaces</b-form-radio>
+              <b-form-radio value="WP">Work Products</b-form-radio>
+              <b-form-radio value="AL">Alphas</b-form-radio>
+            </b-form-radio-group>
+          </b-form-group>
+          <b-form-group v-if="radioSelected === 'AS'" label-class="font-weight-bold" label="Practice Activity Spaces">
+            <b-form-select :required="radioSelected === 'AS'"
+                           value-field="_id"
+                           text-field="name"
+                           v-model="pattern.activitySpace" :options="getPractice.ownedElements.activitySpaces">
+              <template #first>
+                <b-form-select-option :value="null" disabled>-- Please select an activity space --
+                </b-form-select-option>
+              </template>
+            </b-form-select>
+          </b-form-group>
+          <b-form-group v-if="radioSelected === 'WP'" label-class="font-weight-bold" label="Practice Work Products">
+            <b-form-checkbox-group v-model="workProductsSelectedForPattern">
+              <b-form-checkbox :value="wp" v-for="wp in getAllWorkProductManifests" :key="wp._id">
+                {{ wp.workProduct.name }}
+              </b-form-checkbox>
+            </b-form-checkbox-group>
+          </b-form-group>
+          <b-form-group v-if="radioSelected === 'AL'" label-class="font-weight-bold" label="Practice Alphas">
+            <b-form-select :required="radioSelected === 'AL'"
+                           value-field="_id"
+                           text-field="name"
+                           v-model="pattern.alpha" :options="getOwnedAlphas">
+              <template #first>
+                <b-form-select-option :value="null" disabled>-- Please select an Alpha --
+                </b-form-select-option>
+              </template>
+            </b-form-select>
+          </b-form-group>
+          <b-button class="ml-3 float-right" type="reset" variant="outline-dark">Clear</b-button>
+          <b-button class="float-right" type="submit" variant="outline-success">Save</b-button>
+        </b-form>
+        <br>
+        <b-table-simple small striped hover responsive="sm" class="mt-5">
+          <b-thead head-variant="dark">
+            <b-tr>
+              <b-th>Pattern</b-th>
+              <b-th>Association</b-th>
+              <b-th>Target</b-th>
+              <b-th>Element(s)</b-th>
+              <b-th></b-th>
+            </b-tr>
+          </b-thead>
+          <b-tbody>
+            <b-tr v-for="pattern in getAllPracticePatterns" :key="pattern._id">
+              <b-td v-bind:style="{backgroundColor: pattern.areaOfConcern.colorConvention}" v-text="pattern.name"></b-td>
+              <b-td v-text="pattern.associationName"></b-td>
+              <b-td v-text="pattern.target"></b-td>
+              <b-td v-if="pattern.target === 'activitySpace'" v-text="pattern.activitySpaceElement.name"></b-td>
+              <b-td v-if="pattern.target === 'alpha'" v-text="pattern.alphaElement.name"></b-td>
+              <b-td v-if="pattern.target === 'workProduct'">
+                <b-list-group>
+                  <b-list-group-item v-for="wp in pattern.workProductElements" :key="wp._id"> {{wp.name}}</b-list-group-item>
+                </b-list-group>
+              </b-td>
+              <b-td><b-button @click="onRemovePracticePattern(pattern._id)" variant="danger" squared size="sm"><b-icon-trash></b-icon-trash></b-button></b-td>
+            </b-tr>
+          </b-tbody>
+        </b-table-simple>
       </b-tab>
     </b-tabs>
-
-    <b-row>
-      <b-col>
-        <b-form class="mb-5">
-        </b-form>
-      </b-col>
-    </b-row>
-
     <b-modal hide-footer id="new-alpha"
              ref="modal"
              title="Add new alpha to practice">
@@ -403,12 +467,6 @@ export default {
         entry: [],
         result: []
       },
-      options: [
-        {value: {id: '1', value: 'Apple'}},
-        {value: {id: '2', value: 'Orange'}},
-        {value: {id: '3', value: 'Banana'}},
-        {value: {id: '4', value: 'Lime'}}
-      ],
       value: [],
       workProduct: null,
       workProducts: [],
@@ -418,11 +476,22 @@ export default {
       activitySpaceSelectedForActivity: null,
       selectedCompetencies: [],
       activityName: '',
+      pattern: {
+        practice: '',
+        name: '',
+        associationName: '',
+        areaOfConcern: null,
+        alpha: null,
+        activitySpace: null,
+        workProducts: []
+      },
+      workProductsSelectedForPattern: [],
+      radioSelected: null
     }
   },
   computed: {
     ...mapGetters('practice', ['getPractice', 'getPractices', 'getErrorMessage', 'getInfoMessage',
-      'getOwnedAlphas']),
+      'getOwnedAlphas', 'getAllPracticePatterns']),
     ...mapGetters('alpha', ['getKernelAndPracticeAlphasForSelect']),
     ...mapGetters('areaOfConcern', ['getAllAreasOfConcern']),
     ...mapGetters('workProductManifest', ['getAllWorkProductManifests', 'getWorkProductManifest']),
@@ -433,7 +502,9 @@ export default {
     ...mapActions('practice',
         ['create', 'updatePractice', 'fetchAvailablePractices', 'removeAlphaFromPractice',
           'setPracticeToEdit', 'defaultPractice', 'addAlphaPractice', 'updateWorkProduct',
-          'addActivitySpace','removeActivitySpace', 'addPracticeActivity', 'removePracticeActivity']),
+          'addActivitySpace', 'removeActivitySpace', 'addPracticeActivity', 'removePracticeActivity',
+          'addActivitySpacePattern', 'addAlphaPattern', 'fetchAllPracticePatterns',
+          'addWorkProductPattern', 'clearPracticePatterns', 'removePattern']),
     ...mapActions('alpha', ['fetchAllPracticeAlphas']),
     ...mapActions('areaOfConcern', ['fetchAllAreasOfConcern']),
     ...mapActions('workProduct', ['defaultWorkProduct', 'setSelectedWorkProduct']),
@@ -465,10 +536,12 @@ export default {
     async onLoad() {
       await this.fetchAvailablePractices();
       await this.fetchAllAreasOfConcern();
+      this.pattern.practice = this.getPractice._id;
     },
     onNewPractice() {
       this.defaultPractice();
       this.defaultWorkProductManifests();
+      this.clearPracticePatterns();
     },
     linkTabClass(index) {
       if (this.tabIndex === index) {
@@ -484,6 +557,9 @@ export default {
       }
       if (newTabIndex === 5) {
         this.activitySpaceSelected = null;
+      }
+      if (newTabIndex === 6) {
+        this.fetchAllPracticePatterns();
       }
     },
     async onPracticeEdit(practice) {
@@ -542,7 +618,7 @@ export default {
               activitySpace: ownedActivitySpace._id
             });
           }
-        }catch (e) {
+        } catch (e) {
           this.deleteAS = false;
         }
       }
@@ -573,6 +649,67 @@ export default {
       this.activityName = '';
       this.selectedCompetencies = [];
       this.activitySpaceSelectedForActivity = null;
+    },
+    async onSavePattern() {
+      if (this.pattern.practice !== '') {
+        let asFound;
+        let alphaFound;
+        let areaOfConcernUnique;
+        switch (this.radioSelected) {
+          case 'AS':
+            console.log('Activity space');
+            asFound = this.getPractice.ownedElements.activitySpaces
+                .find(e => e._id === this.pattern.activitySpace);
+            console.log(asFound);
+            if (asFound !== undefined) {
+              this.pattern.areaOfConcern = asFound.areaOfConcern._id;
+              await this.addActivitySpacePattern(this.pattern);
+            }
+            break
+          case 'WP':
+            console.log('Work products space');
+            areaOfConcernUnique = this.workProductsSelectedForPattern.map(e => e.alpha.areaOfConcern._id)
+                .filter((v, i, arr) => arr.indexOf(v) === i);
+            if (areaOfConcernUnique.length === 1) {
+              console.log(areaOfConcernUnique);
+              this.pattern.areaOfConcern = areaOfConcernUnique[0];
+              this.pattern.workProducts = this.workProductsSelectedForPattern.map(e => e.workProduct._id);
+              await this.addWorkProductPattern(this.pattern);
+            } else {
+              console.error('All work products should belongs to the same alpha...')
+            }
+            break
+          case 'AL':
+            console.log('Alphas');
+            alphaFound = this.getOwnedAlphas.find(e => e._id === this.pattern.alpha);
+            if (alphaFound !== undefined) {
+              this.pattern.areaOfConcern = alphaFound.areaOfConcern._id;
+              await this.addAlphaPattern(this.pattern);
+            }
+            break
+          default:
+            console.log('default')
+        }
+        this.onAddingNewPattern();
+      }
+    },
+    async onRemovePracticePattern(patternId) {
+      if (this.getPractice._id !== '' && patternId !== undefined && patternId !== '') {
+        await this.removePattern(patternId);
+      }
+    },
+    onAddingNewPattern() {
+      this.pattern = {
+        practice: '',
+        name: '',
+        associationName: '',
+        areaOfConcern: null,
+        alpha: null,
+        activitySpace: null,
+        workProducts: []
+      }
+      this.workProductsSelectedForPattern = [];
+      this.radioSelected = null;
     }
   },
   created() {
@@ -585,6 +722,5 @@ export default {
 .color-font {
   color: black;
   font-weight: bold;
-  /*background-color: darkgoldenrod;*/
 }
 </style>

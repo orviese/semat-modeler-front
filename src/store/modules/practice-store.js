@@ -22,7 +22,17 @@ const state = () => ({
         }
     },
     errorMessage: '',
-    infoMessage: ''
+    infoMessage: '',
+    patterns: [{
+        owner: '',
+        name: '',
+        target: '',
+        areaOfConcern: '',
+        associationName: '',
+        activitySpaceElement: '',
+        workProductElements: [],
+        alphaElement: ''
+    }]
 });
 
 const getters = {
@@ -53,6 +63,9 @@ const getters = {
                 return 0;
             }
         })
+    },
+    getAllPracticePatterns(state) {
+        return state.patterns;
     }
 }
 
@@ -172,6 +185,57 @@ const actions = {
             .catch(error => {
                 console.error(error);
             })
+    },
+    async addActivitySpacePattern({commit}, data) {
+        practiceService.addActivitySpacePatternToPractice(data)
+            .then(response => {
+                commit('setInfoMessage', 'Added as pattern');
+                commit('addPracticePattern', response.data);
+            })
+            .catch(error => {
+                console.error(error);
+            })
+    },
+    async addAlphaPattern({commit}, data) {
+        practiceService.addAlphaPatternToPractice(data)
+            .then(response => {
+                commit('setInfoMessage', 'Added alpha pattern');
+                commit('addPracticePattern', response.data);
+            })
+            .catch(error => {
+                console.error(error);
+            })
+    },
+    async addWorkProductPattern({commit}, data) {
+        practiceService.addWorkProductPatternToPractice(data)
+            .then(response => {
+                commit('setInfoMessage', 'Added workProduct pattern');
+                commit('addPracticePattern', response.data);
+            })
+            .catch(error => {
+                console.error(error);
+            })
+    },
+    async fetchAllPracticePatterns({commit, state}) {
+        if (state.practice._id !== '') {
+            practiceService.fetchAllPracticePatterns(state.practice._id)
+                .then (response => {
+                    commit('refreshPracticePatterns', response.data);
+                }).catch(error => {
+                console.error(error);
+            });
+        }
+    },
+    clearPracticePatterns({commit}) {
+        commit('clearPatterns');
+    },
+    async removePattern({dispatch}, patternId) {
+        practiceService.deletePracticePattern(patternId)
+            .then(() => {
+                dispatch('fetchAllPracticePatterns');
+            }).catch(error => {
+            console.error(error);
+        });
     }
 }
 
@@ -212,6 +276,17 @@ const mutations = {
                 activities: []
             }
         }
+
+        state.patterns = [{
+            owner: '',
+            name: '',
+            target: '',
+            areaOfConcern: '',
+            associationName: '',
+            activitySpaceElement: '',
+            workProductElements: [],
+            alphaElement: ''
+        }];
     },
     setPracticeToEdit(state, payload) {
         console.log('updating practice to edit')
@@ -231,6 +306,24 @@ const mutations = {
     },
     refreshPracticeActivityAssociations(state, payload) {
         state.practice.ownedElements.activityAssociations = payload;
+    },
+    refreshPracticePatterns(state, payload) {
+        state.patterns = payload;
+    },
+    addPracticePattern(state, payload) {
+        state.patterns.push(payload);
+    },
+    clearPatterns(state) {
+        state.patterns = [{
+            owner: '',
+            name: '',
+            target: '',
+            areaOfConcern: '',
+            associationName: '',
+            activitySpaceElement: '',
+            workProductElements: [],
+            alphaElement: ''
+        }];
     }
 }
 
