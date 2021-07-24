@@ -1,14 +1,14 @@
 <template>
   <b-container class="mb-5">
     <h4>Config validation for practice: <strong>{{ getPractice.name }}</strong></h4>
-    <b-tabs class="my-5" v-model="tabIndex" lazy @activate-tab="onTabSelectionChange" >
+    <b-tabs class="my-5" v-model="tabIndex" lazy @activate-tab="onTabSelectionChange">
       <b-tab title="Available Practices">
         <b-table-simple hover striped small bordered class="mt-3">
           <b-thead head-variant="dark">
             <b-th>Name</b-th>
             <b-th>Objective</b-th>
             <b-th>Tags</b-th>
-            <b-th>Create Validation</b-th>
+            <b-th>Create Validation / Look</b-th>
           </b-thead>
           <b-tbody>
             <b-tr v-for="practice in getPractices" :key="practice._id">
@@ -16,15 +16,22 @@
               <b-td>{{ practice.objective }}</b-td>
               <b-td>{{ practice.tags }}</b-td>
               <b-td class="text-center">
-                <b-button @click="onValidate(practice)" variant="success">
+                <b-button v-b-tooltip.hover title="Click to create a new public validation"
+                          squared size="sm"
+                          @click="onCreateValidation(practice)" variant="success">
                   <b-icon-check-circle></b-icon-check-circle>
+                </b-button>
+                <b-button @click="onVisualizePracticeValidation(practice)"
+                          v-b-tooltip.hover title="Click to visualize practice criteria and validations"
+                          class="ml-3" variant="info" squared size="sm">
+                  <b-icon-eye></b-icon-eye>
                 </b-button>
               </b-td>
             </b-tr>
           </b-tbody>
         </b-table-simple>
       </b-tab>
-      <b-tab title="Criteria">
+      <b-tab title="Practice Criteria">
         <b-form @submit.prevent="onSaveCriterion" @reset.prevent="clearCriterion" class="mt-5">
           <b-form-group>
             <b-form-input v-model="criterion.name" placeholder="Criterion Name"></b-form-input>
@@ -92,89 +99,51 @@
         </b-form-group>
 
       </b-tab>
-      <b-tab title="Validations"></b-tab>
-      <b-tab title="Validate">
-        <b-form @submit.prevent="onSaveValidationResults" class="mt-5">
-          <b-form-group label="Criteria List" label-class="font-weight-bold bg-warning">
-            <b-form-group
-                label-class="font-weight-bold"
-                :id="criterion._id" :label="criterion.name"
-                v-for="criterion in getAllValidationCriteria"
-                :key="criterion._id">
-              <b-form-group :description="variable.meaning"
-                  label-class="font-weight-bold" label-cols="2" :label="variable.symbol"
-                  v-for="variable in criterion.variables"
-                  :key="variable._id">
-                <b-form-input required v-on:keypress="isNumber($event, variable.value)" type="number"
-                              v-model="variable.value"></b-form-input>
-              </b-form-group>
-              <b-form-group label-class="font-weight-bold" label-cols="2"
-                            label="Result" :description="`Formula expression: ${getExpressionResult(criterion)}`">
-                <b-form-input v-model="criterion.result"  disabled>
-                </b-form-input>
-              </b-form-group>
-            </b-form-group>
-          </b-form-group>
-          <b-form-group>
-            <b-button class="ml-3 float-right" type="reset" variant="outline-dark">Clear</b-button>
-            <b-button class="float-right" type="submit" variant="outline-success">Save</b-button>
-          </b-form-group>
-          <b-form-group>
-            <b-table-simple small striped hover responsive="xs" class="mt-5">
-              <b-thead head-variant="dark">
-                <b-tr>
-                  <b-th>Criterion</b-th>
-                  <!--<b-th>Description</b-th>-->
-                  <b-th>Expression</b-th>
-                  <b-th>Avg. Results</b-th>
-                  <b-th></b-th>
-                </b-tr>
-              </b-thead>
-              <b-tbody>
-                <!--
-                <b-tr v-for="result in getAllValidationCriteria" :key="result._id">
-                  <b-td>{{ result.name }}</b-td>
-                  <b-td>{{ result.description }}</b-td>
-                  <b-td>{{ result.expression }}</b-td>
-                  <b-td>
-                    <b-button-group vertical size="sm">
-                      <b-button class="ml-1" size="sm"
-                                v-for="validation in result.validations"
-                                :key="validation._id">
-                        {{ validation.formulaResult | number('0.00') }}
-                        <b-icon-trash></b-icon-trash>
-                      </b-button>
-                    </b-button-group>
-                  </b-td>
-                  <b-td>
-                    <b-button variant="danger" squared size="sm">
-                      <b-icon-trash></b-icon-trash>
-                    </b-button>
-                  </b-td>
-                </b-tr>
-                -->
-                <b-tr v-for="summary in getAllPracticeValidationSummary" :key="summary._id.criterion">
-                  <b-td>{{summary._id.name}}</b-td>
-                  <b-td>{{summary._id.expression}}</b-td>
-                  <b-td>{{summary.average | number('0.00')}}</b-td>
-                  <b-td>
-                    <b-button @click="onRemoveValidations(summary._id.criterion)" variant="danger" squared size="sm">
-                      <b-icon-trash></b-icon-trash>
-                    </b-button>
-                  </b-td>
-                </b-tr>
-              </b-tbody>
-            </b-table-simple>
-          </b-form-group>
-        </b-form>
-      </b-tab>
-      <b-tab title="Summary" disabled>
-        <vue-bar-graph class="my-5 mx-5"
-                       :points="getGraphPoints"
-                       :width="400"
-                       :height="200"
-                       :show-y-axis="true"
-                       :show-x-axis="true"/>
+      <b-tab title="Created Validations">
+        <b-table-simple small striped hover responsive="xs" class="mt-5">
+          <b-thead head-variant="dark">
+            <b-tr>
+              <b-th>Link</b-th>
+              <b-th>Practice</b-th>
+              <b-th>Person</b-th>
+              <b-th>Email</b-th>
+              <b-th>Finished</b-th>
+              <b-th>Comments</b-th>
+              <b-th>Criteria</b-th>
+              <b-th></b-th>
+            </b-tr>
+          </b-thead>
+          <b-tbody>
+            <b-tr v-for="result in getAllPublicValidation" :key="result._id">
+              <b-td>
+                <b-button @click="onGetLink(result._id)" size="sm" squared variant="success">
+                  <b-icon-link></b-icon-link>
+                </b-button>
+              </b-td>
+              <b-td>{{ result.practice.name }}</b-td>
+              <b-td>{{ result.personName }}</b-td>
+              <b-td>{{ result.email }}</b-td>
+              <b-td>{{ result.finished ? 'Yes' : 'No' }}</b-td>
+              <b-td>{{ result.comment }}</b-td>
+              <b-td>
+                <b-list-group>
+                  <b-list-group-item
+                      class="d-flex justify-content-between align-items-center"
+                      v-for="criterion in result.criteria" :key="criterion._id">
+                    {{ criterion.name }}
+                    <b-badge variant="info" pill>{{ criterion.result }}</b-badge>
+                  </b-list-group-item>
+                </b-list-group>
+              </b-td>
+              <b-td>
+                <b-button :disabled="result.finished" variant="danger" squared size="sm">
+                  <b-icon-trash></b-icon-trash>
+                </b-button>
+              </b-td>
+            </b-tr>
+
+          </b-tbody>
+        </b-table-simple>
       </b-tab>
     </b-tabs>
 
@@ -183,13 +152,9 @@
 
 <script>
 import {mapActions, mapGetters} from "vuex";
-import VueBarGraph from 'vue-bar-graph';
-
+import {applicationPaths} from '@/utils/commons'
 export default {
-  name: "ValidatePractice",
-  components: {
-    VueBarGraph
-  },
+  name: "ConfigPracticeValidation",
   data() {
     return {
       tabIndex: 0,
@@ -207,31 +172,45 @@ export default {
   },
   computed: {
     ...mapGetters('validatePractice',
-        ['getPractice', 'getPractices', 'getAllValidationCriteria', 'getAllPracticeValidationSummary']),
-    getGraphPoints() {
-      return this.getAllPracticeValidationSummary.map(el => {
-        return {
-          label: el._id.name,
-          value: el.average
-        }
-      });
+        ['getPractice', 'getPractices', 'getAllValidationCriteria',
+          'getAllPracticeValidationSummary', 'getAllPublicValidation']),
+    getAppURL() {
+      return applicationPaths.application;
     },
+    getPublicResource() {
+      return applicationPaths.publicResource;
+    }
   },
   methods: {
     ...mapActions('validatePractice', ['fetchAvailablePractices',
       'setPracticeToEdit', 'fetchAllPracticeValidationCriteria',
       'removePracticeValidationCriterion', 'create',
-      'savePracticeValidationResult', 'fetchAllValidationCriteriaSummary', 'removeValidationsFromCriterion']),
-    isNumber(event, variableValue) {
-      if (!/\d/.test(event.key) && (event.key !== "." || /\./.test(variableValue)))
-        return event.preventDefault();
-    },
-    onValidate(practice) {
-      this.tabIndex = 1;
+      'savePracticeValidationResult', 'fetchAllValidationCriteriaSummary',
+      'removeValidationsFromCriterion', 'clearConfigValidationData',
+      'createPublicPracticeValidation', 'fetchAllPublicPracticeValidations']),
+    async onCreateValidation(practice) {
+      this.clearConfigValidationData();
       this.setPracticeToEdit(practice);
       this.criterion.owner = practice._id;
-      this.fetchAllPracticeValidationCriteria(this.criterion.owner);
-      this.fetchAllValidationCriteriaSummary(this.criterion.owner);
+      await this.fetchAllPracticeValidationCriteria(this.criterion.owner);
+      await this.fetchAllPublicPracticeValidations();
+      console.log(this.getAllValidationCriteria.length);
+      if (this.getAllValidationCriteria.length > 0) {
+        console.log('creation public validation');
+        let data = this.getAllValidationCriteria.map(e => {
+          const {name, objective, expression, variables} = e;
+          return {
+            name, objective, expression, variables
+          }
+        })
+        await this.createPublicPracticeValidation({
+          criteria: data
+        });
+        this.tabIndex = 2;
+      } else {
+        alert('Selected practice does not have any validation criteria.')
+        this.tabIndex = 1;
+      }
     },
     onAddVariable() {
       this.criterion.variables.push({
@@ -269,18 +248,6 @@ export default {
         expression: ''
       }
     },
-    getExpressionResult(criterion) {
-      let expressionWithNumbers = criterion.expression;
-      try {
-        criterion.variables.forEach(e => {
-          expressionWithNumbers = expressionWithNumbers.replaceAll(e.symbol, e.value);
-        });
-        criterion.result = eval(expressionWithNumbers);
-      } catch (e) {
-        alert('Problems with some expression ' + e);
-      }
-      return expressionWithNumbers;
-    },
     async onSaveValidationResults() {
       const dataToSend = this.getAllValidationCriteria.map(e => {
         return {
@@ -311,6 +278,17 @@ export default {
         console.log('Removing criterion validations... ' + criterionId)
         await this.removeValidationsFromCriterion(criterionId);
       }
+    },
+    onGetLink(publicValidationId) {
+      alert(`Link to validate practice: \n ${this.getAppURL}/#${this.getPublicResource} ${publicValidationId}`)
+    },
+    onVisualizePracticeValidation(practice) {
+      this.clearConfigValidationData();
+      this.setPracticeToEdit(practice);
+      this.criterion.owner = practice._id;
+      this.fetchAllPracticeValidationCriteria(this.criterion.owner);
+      this.fetchAllPublicPracticeValidations();
+      this.tabIndex = 2;
     }
 
   },

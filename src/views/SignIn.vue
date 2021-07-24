@@ -43,7 +43,7 @@ export default {
     ...mapGetters('account', ['getErrorMessage', 'getAccount'])
   },
   methods: {
-    ...mapActions('account', ['signIn', 'signOut']),
+    ...mapActions('account', ['signIn', 'signOut', 'clearSession']),
     async doSignIn() {
       await this.signIn(this.form);
       if (this.getErrorMessage !== '') {
@@ -52,12 +52,12 @@ export default {
         this.showAlert = false;
       }
     },
-    async doSingOut() {
-      await this.signOut()
+    async doClearSession() {
+      await this.clearSession()
     }
   },
   mounted() {
-    this.doSingOut();
+    this.doClearSession();
     console.log('Mounting')
   }
 }

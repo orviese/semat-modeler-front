@@ -13,7 +13,8 @@ import AlphaView from "@/views/AlphaView";
 import ActivitySpaceView from "@/views/ActivitySpaceView";
 import ModelPractice from "@/views/ModelPractice";
 import CompetencyView from "@/views/CompetencyView";
-import ValidatePractice from "@/views/ValidatePractice";
+import ConfigPracticeValidation from "@/views/ConfigPracticeValidation";
+import PublicPracticeValidation from "@/views/PublicPracticeValidation";
 
 Vue.use(VueRouter)
 
@@ -75,8 +76,16 @@ const routes = [
       {
         path: '/validate-practices',
         name: 'ValidatePractices',
-        component: ValidatePractice,
+        component: ConfigPracticeValidation,
         meta: {secure: true},
+      },
+      {
+        //http://localhost:8080/#/validate-practices/public/60fa02642c5ef33459235f4d
+        path: '/validate-practices/public/:id',
+        name: 'PublicPracticeValidation',
+        component: PublicPracticeValidation,
+        meta: {secure: false},
+        props: true
       },
       {
         path: '/competencies',
@@ -84,29 +93,6 @@ const routes = [
         component: CompetencyView,
         meta: {secure: true},
       }
-      /*,{
-        path: '/dashboard',
-        name: 'Dashboard',
-        component: Dashboard,
-        meta: {secure: true},
-        children: [
-          {
-            path: '/hello',
-            name: 'Hello',
-            component: HelloWorld,
-          },
-          {
-            path: '/about',
-            name: 'About',
-            component: About,
-          },
-          {
-            path: '/areas-of-concern',
-            name: 'AreaOfConcern',
-            component: AreaOfConcernView
-          }
-        ]
-      }*/
     ]
   },
   {
@@ -124,9 +110,12 @@ router.beforeEach((to, from, next)=>{
   const isLogged = store().state.account.isLogged;
   if (to.matched.some(value => value.meta.secure) && isLogged){
     next();
-  }else if(to.name !== 'SignIn' && to.name !== 'SignUp'){
+  }else if (to.matched.some(value => !value.meta.secure)) {
+    next();
+  } else if(to.name !== 'SignIn' && to.name !== 'SignUp'){
+    console.log('different ')
     next('/signin');
-  }else {
+  } else {
     next(); //review a redundant warning
   }
 });

@@ -22,7 +22,10 @@ const state = () => ({
     },
     errorMessage: '',
     infoMessage: '',
-    criteria: []
+    criteria: [],
+    summary: [],
+    publicValidations: [],
+    publicPracticeToValidate: {}
 });
 
 const getters = {
@@ -40,6 +43,15 @@ const getters = {
     },
     getAllValidationCriteria(state) {
         return state.criteria;
+    },
+    getAllPracticeValidationSummary(state) {
+        return state.summary;
+    },
+    getAllPublicValidation(state) {
+        return state.publicValidations;
+    },
+    getPublicPracticeToValidate(state) {
+        return state.publicPracticeToValidate;
     }
 }
 
@@ -56,14 +68,14 @@ const actions = {
             }
         }
     },
-    fetchAllPracticeValidationCriteria({commit}, practiceId) {
-        practiceValidationService.getAllPracticeValidationCriteria(practiceId)
-            .then(response => {
-                commit('setPracticeValidationCriteria', response.data);
-            })
-            .catch(error => {
-                console.error(error);
-            });
+    async fetchAllPracticeValidationCriteria({commit}, practiceId) {
+        console.log('getting all validation criteria')
+        try {
+            let response = await practiceValidationService.getAllPracticeValidationCriteria(practiceId);
+            commit('setPracticeValidationCriteria', response.data);
+        } catch (error) {
+            console.error(error);
+        }
     },
     async removePracticeValidationCriterion({dispatch, state}, data) {
         practiceValidationService.deletePracticeValidationCriterion(data)
@@ -88,6 +100,87 @@ const actions = {
     },
     defaultPractice({commit}) {
         commit('setDefaultPractice');
+    },
+    async savePracticeValidationResult({commit, dispatch, state}, data) {
+        practiceValidationService.createPracticeValidationResult(data)
+            .then(response => {
+                console.log(response.data);
+                commit('setInfoMessage', 'Validation result saved');
+                dispatch('fetchAllValidationCriteriaSummary', state.practice._id);
+            })
+            .catch(error => {
+                console.error(error);
+            });
+    },
+    async fetchAllValidationCriteriaSummary({commit}, practice) {
+        console.log('getting summaries')
+        practiceValidationService.getAllPracticeValidationCriteriaSummary(practice)
+            .then(response => {
+            commit('refreshPracticeValidationSummary', response.data);
+        })
+            .catch(error => {
+                console.error(error);
+            });
+    },
+    async removeValidationsFromCriterion({dispatch, state}, criterion) {
+        practiceValidationService.deleteValidationsFromCriterion(criterion)
+            .then(() => {
+                dispatch('fetchAllValidationCriteriaSummary', state.practice._id);
+            })
+            .catch(error => {
+                console.error(error);
+            });
+    },
+    async clearConfigValidationData({commit}) {
+        commit('setDefaultPractice');
+        commit('setPracticeValidationCriteria', []);
+    },
+    async createPublicPracticeValidation({commit, state}, data) {
+        practiceValidationService.createNewPublicPracticeValidation(state.practice._id, data)
+            .then(response => {
+                commit('addPublicValidation', response.data);
+                commit('setInfoMessage', 'Public Validation Practice created')
+            })
+            .catch(error => {
+            console.error(error);
+        });
+    },
+    async fetchAllPublicPracticeValidations({commit, state}) {
+        try {
+            let result =  await practiceValidationService.getAllPublicPracticeValidation(state.practice._id);
+            commit('refreshPublicValidations', result.data);
+        } catch (error) {
+            console.error(error);
+        }
+    },
+
+    async findPublicPracticeValidationById({commit}, validationId) {
+        try {
+            const response = await practiceValidationService.getPublicPracticeValidation(validationId);
+            commit('setPublicPracticeToValidate', response.data)
+            commit('setInfoMessage', 'Information fetched')
+        } catch (error) {
+            console.error(error);
+            commit('setPublicPracticeToValidate', {});
+            commit('setErrorMessage', error.response.data.errors[0])
+        }
+    },
+
+    async savePublicValidation({commit}, data) {
+        practiceValidationService.saveAndClosePublicPracticeValidation(data.validationId, data)
+            .then(response => {
+                console.log('then')
+                commit('setPublicPracticeToValidate', response.data)
+            }).catch(error => {
+            console.log('catch')
+            console.error(error)
+            if (error.response.status !== 404) {
+                commit('setErrorMessage', error.response.data.errors[0])
+            }else {
+                commit('setErrorMessage', error)
+            }
+
+        })
     }
 }
 
@@ -140,6 +233,18 @@ const mutations = {
     },
     addCriterionToList(state, payload) {
         state.criteria.push(payload);
+    },
+    refreshPracticeValidationSummary(state, payload) {
+        state.summary = payload;
+    },
+    addPublicValidation(state, payload) {
+        state.publicValidations.push(payload);
+    },
+    refreshPublicValidations(state, payload) {
+        state.publicValidations = payload
+    },
+    setPublicPracticeToValidate(state, payload) {
+        state.publicPracticeToValidate = payload;
     }
 }
 

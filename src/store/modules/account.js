@@ -84,7 +84,11 @@ const actions = {
         commit('setLoggedIn', false);
         commit('clearState', rootState);
         await router.push('/signin');
-
+    },
+    async clearSession({commit, rootState}) {
+        await accountService.signOut();
+        commit('setLoggedIn', false);
+        commit('clearState', rootState);
     }
 }
 

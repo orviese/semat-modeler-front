@@ -100,7 +100,6 @@
                 v-model="getPractice.result" placeholder="">
             </b-form-tags>
           </b-form-group>
-          <div><p>{{ getPractice }}</p></div>
         </b-form>
       </b-tab>
       <b-tab title="Alphas" :title-link-class="linkTabClass(2)">
@@ -671,7 +670,6 @@ export default {
             areaOfConcernUnique = this.workProductsSelectedForPattern.map(e => e.alpha.areaOfConcern._id)
                 .filter((v, i, arr) => arr.indexOf(v) === i);
             if (areaOfConcernUnique.length === 1) {
-              console.log(areaOfConcernUnique);
               this.pattern.areaOfConcern = areaOfConcernUnique[0];
               this.pattern.workProducts = this.workProductsSelectedForPattern.map(e => e.workProduct._id);
               await this.addWorkProductPattern(this.pattern);
@@ -700,7 +698,7 @@ export default {
     },
     onAddingNewPattern() {
       this.pattern = {
-        practice: '',
+        practice: this.getPractice._id,
         name: '',
         associationName: '',
         areaOfConcern: null,

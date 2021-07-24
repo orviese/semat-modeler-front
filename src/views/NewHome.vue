@@ -42,12 +42,12 @@ export default {
           title: (this.isLogged ? this.getAccount.name : 'Menu navigation'),
           hiddenOnCollapse: true
         },
-        {
+       /* {
           href: '/dashboard',
           title: 'Dashboard',
           icon: 'fa fa-archive',
           hidden: !this.isLogged
-        },
+        },*/
         {
           title: 'Kernel',
           icon: 'fa fa-cog',
@@ -87,15 +87,27 @@ export default {
             },
             {
               href: '/validate-practices',
-              title: 'Validate',
-              icon: 'fa fa-check-square'
+              title: 'Config Validation',
+              icon: 'fa fa-tools'
             }
           ]
+        },
+        {
+          href: '/validate-practices/public/:id',
+          title: 'Public Validations',
+          icon: 'fa fa-user-check',
+          hidden: true
         },
         {
           title: 'Account',
           icon: 'fa fa-user-circle',
           child: [
+            {
+              href: '/signup',
+              title: 'Register',
+              icon: 'fa fa-user',
+              hidden: this.isLogged
+            },
             {
               href: '/profile',
               title: 'Profile',
@@ -103,7 +115,7 @@ export default {
               hidden: !this.isLogged
             },
             {
-              href: '/sigin',
+              href: '/signin',
               title: 'Login',
               icon: 'fa fa-key',
               hidden: this.isLogged
