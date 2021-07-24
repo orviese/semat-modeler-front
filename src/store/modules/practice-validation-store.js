@@ -23,7 +23,6 @@ const state = () => ({
     errorMessage: '',
     infoMessage: '',
     criteria: [],
-    summary: [],
     publicValidations: [],
     publicPracticeToValidate: {}
 });
@@ -44,9 +43,6 @@ const getters = {
     getAllValidationCriteria(state) {
         return state.criteria;
     },
-    getAllPracticeValidationSummary(state) {
-        return state.summary;
-    },
     getAllPublicValidation(state) {
         return state.publicValidations;
     },
@@ -56,7 +52,7 @@ const getters = {
 }
 
 const actions = {
-    async create({commit}, criterion) {
+    async newPracticeValidationCriterion({commit}, criterion) {
         try {
             let criterionCreated = await practiceValidationService.createPracticeValidationCriterion(criterion);
             commit('addCriterionToList', criterionCreated.data);
@@ -86,9 +82,9 @@ const actions = {
                 console.error(error);
             });
     },
-    async fetchAvailablePractices({commit}) {
+    async fetchAllAvailablePractices({commit}) {
         try {
-            let practices = await practiceValidationService.fetchAllPractices();
+            let practices = await practiceValidationService.getAllAvailablePractices();
             commit('setPractices', practices.data.practices);
         } catch (e) {
             commit('setErrorMessage', 'problems getting available practices...');
@@ -101,6 +97,7 @@ const actions = {
     defaultPractice({commit}) {
         commit('setDefaultPractice');
     },
+    /*
     async savePracticeValidationResult({commit, dispatch, state}, data) {
         practiceValidationService.createPracticeValidationResult(data)
             .then(response => {
@@ -111,7 +108,8 @@ const actions = {
             .catch(error => {
                 console.error(error);
             });
-    },
+    },*/
+    /*
     async fetchAllValidationCriteriaSummary({commit}, practice) {
         console.log('getting summaries')
         practiceValidationService.getAllPracticeValidationCriteriaSummary(practice)
@@ -121,7 +119,8 @@ const actions = {
             .catch(error => {
                 console.error(error);
             });
-    },
+    },*/
+    /*
     async removeValidationsFromCriterion({dispatch, state}, criterion) {
         practiceValidationService.deleteValidationsFromCriterion(criterion)
             .then(() => {
@@ -130,8 +129,8 @@ const actions = {
             .catch(error => {
                 console.error(error);
             });
-    },
-    async clearConfigValidationData({commit}) {
+    },*/
+    async clearPracticeValidationConfigData({commit}) {
         commit('setDefaultPractice');
         commit('setPracticeValidationCriteria', []);
     },
@@ -142,18 +141,50 @@ const actions = {
                 commit('setInfoMessage', 'Public Validation Practice created')
             })
             .catch(error => {
-            console.error(error);
-        });
+                console.error(error);
+            });
     },
-    async fetchAllPublicPracticeValidations({commit, state}) {
+    async removePublicPracticeValidationRequest({commit, dispatch}, validationRequestId) {
+        practiceValidationService.deletePracticeValidationRequest(validationRequestId)
+            .then(() => {
+                dispatch('fetchAllPublicPracticeValidationRequests');
+                commit('setInfoMessage', 'Validation Request removed')
+            })
+            .catch(error => {
+                console.error(error)
+                commit('setErrorMessage', 'Problems removing validation request')
+            });
+    },
+    async fetchAllPublicPracticeValidationRequests({commit, state}) {
         try {
-            let result =  await practiceValidationService.getAllPublicPracticeValidation(state.practice._id);
+            let result = await practiceValidationService.getAllPublicPracticeValidationRequests(state.practice._id);
             commit('refreshPublicValidations', result.data);
         } catch (error) {
             console.error(error);
         }
     },
-
+    async getPracticeValidationRequestReport({commit}, practiceId) {
+        practiceValidationService.getPublicPracticeValidationReport(practiceId)
+            .then((response) => {
+                let fileURL = window.URL.createObjectURL(new Blob([response.data]));
+                let fileLink = document.createElement('a');
+                fileLink.href = fileURL;
+                fileLink.setAttribute('download', 'report.txt');
+                document.body.appendChild(fileLink);
+                fileLink.click();
+                commit('setInfoMessage', 'Information downloaded')
+            })
+            .catch(error => {
+                if (error.response.status !== 404 && error.response.status !== 401) {
+                    commit('setErrorMessage', error.response.data.errors[0])
+                } else {
+                    commit('setErrorMessage', error)
+                }
+            })
+    },
+    defaultPublicPracticeToValidate({commit}) {
+        commit('setPublicPracticeToValidate', {});
+    },
     async findPublicPracticeValidationById({commit}, validationId) {
         try {
             const response = await practiceValidationService.getPublicPracticeValidation(validationId);
@@ -165,21 +196,17 @@ const actions = {
             commit('setErrorMessage', error.response.data.errors[0])
         }
     },
-
-    async savePublicValidation({commit}, data) {
+    async savePublicPracticeValidationRequest({commit}, data) {
         practiceValidationService.saveAndClosePublicPracticeValidation(data.validationId, data)
             .then(response => {
                 console.log('then')
                 commit('setPublicPracticeToValidate', response.data)
             }).catch(error => {
-            console.log('catch')
-            console.error(error)
             if (error.response.status !== 404) {
                 commit('setErrorMessage', error.response.data.errors[0])
-            }else {
+            } else {
                 commit('setErrorMessage', error)
             }
-
         })
     }
 }
@@ -234,13 +261,12 @@ const mutations = {
     addCriterionToList(state, payload) {
         state.criteria.push(payload);
     },
-    refreshPracticeValidationSummary(state, payload) {
-        state.summary = payload;
-    },
     addPublicValidation(state, payload) {
         state.publicValidations.push(payload);
     },
     refreshPublicValidations(state, payload) {
+        if (payload === '')
+            payload = []
         state.publicValidations = payload
     },
     setPublicPracticeToValidate(state, payload) {

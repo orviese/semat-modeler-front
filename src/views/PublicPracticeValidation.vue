@@ -8,7 +8,7 @@
              @dismissed="dismissCountDown=0"
              @dismiss-count-down="countDownChanged"
     >
-      {{  getAlertMessage }}
+      {{ getAlertMessage }}
     </b-alert>
     <b-tabs class="mt-3">
       <b-tab title="Practice Representation">
@@ -17,8 +17,8 @@
         </b-button>
         <b-table-simple
             v-if="getPublicPracticeToValidate.practice !== undefined"
-            small striped hover responsive borderless sticky-header="100%"  caption-top class="mt-3">
-          <caption>Practice: {{getPublicPracticeToValidate.practice.name}}</caption>
+            small striped hover responsive borderless sticky-header="100%" caption-top class="mt-3">
+          <caption>Practice: {{ getPublicPracticeToValidate.practice.name }}</caption>
           <b-thead head-variant="dark">
             <b-tr>
               <b-th>Alphas</b-th>
@@ -37,8 +37,10 @@
                   </b-thead>
                   <b-tbody>
                     <b-tr class="border-bottom border-success" v-for="wp in getWorkProductManifest" :key="wp._id">
-                      <b-td v-bind:style="{backgroundColor: wp.alpha.areaOfConcern.colorConvention}">{{wp.alpha.name}}</b-td>
-                      <b-td>{{wp.workProduct.name}}</b-td>
+                      <b-td v-bind:style="{backgroundColor: wp.alpha.areaOfConcern.colorConvention}">
+                        {{ wp.alpha.name }}
+                      </b-td>
+                      <b-td>{{ wp.workProduct.name }}</b-td>
                     </b-tr>
                   </b-tbody>
                 </b-table-simple>
@@ -51,16 +53,18 @@
                     <b-th>Required Competencies</b-th>
                   </b-thead>
                   <b-tbody>
-                    <b-tr class="border-bottom border-success" v-for="activityAssociation in getActivityAssociations" :key="activityAssociation._id">
+                    <b-tr class="border-bottom border-success" v-for="activityAssociation in getActivityAssociations"
+                          :key="activityAssociation._id">
                       <b-td v-bind:style="{backgroundColor: activityAssociation.end2.areaOfConcern.colorConvention}">
-                        {{activityAssociation.end2.name}}</b-td>
-                      <b-td>{{activityAssociation.end1.name}}</b-td>
+                        {{ activityAssociation.end2.name }}
+                      </b-td>
+                      <b-td>{{ activityAssociation.end1.name }}</b-td>
                       <b-td>
                         <b-list-group>
                           <b-list-group-item
                               v-bind:style="{backgroundColor: cl.areaOfConcern.colorConvention}"
                               v-for="cl in activityAssociation.end1.requiredCompetencyLevel" :key="cl._id">
-                            {{cl.name}}
+                            {{ cl.name }}
                           </b-list-group-item>
                         </b-list-group>
                       </b-td>
@@ -73,31 +77,38 @@
                   <b-thead>
                     <b-th>Pattern</b-th>
                     <b-th>Association</b-th>
-                    <b-th>Target</b-th>
+                    <b-th>Element type</b-th>
                     <b-th>Element</b-th>
                   </b-thead>
                   <b-tbody>
-                    <b-tr class="border-bottom border-success" v-for="patternActivity in getActivitySpacePatterns" :key="patternActivity._id">
-                      <b-td v-bind:style="{backgroundColor: patternActivity.areaOfConcern.colorConvention}" >{{patternActivity.name}}</b-td>
-                      <b-td>{{patternActivity.associationName}}</b-td>
-                      <b-td>{{patternActivity.target}}</b-td>
-                      <b-td>{{patternActivity.activitySpaceElement.name}}</b-td>
+                    <b-tr class="border-bottom border-success" v-for="patternActivity in getActivitySpacePatterns"
+                          :key="patternActivity._id">
+                      <b-td v-bind:style="{backgroundColor: patternActivity.areaOfConcern.colorConvention}">
+                        {{ patternActivity.name }}
+                      </b-td>
+                      <b-td>{{ patternActivity.associationName }}</b-td>
+                      <b-td>{{ patternActivity.target }}</b-td>
+                      <b-td>{{ patternActivity.activitySpaceElement.name }}</b-td>
                     </b-tr>
                     <b-tr v-for="patternActivity in getAlphaPatterns" :key="patternActivity._id">
-                      <b-td v-bind:style="{backgroundColor: patternActivity.areaOfConcern.colorConvention}" >{{patternActivity.name}}</b-td>
-                      <b-td>{{patternActivity.associationName}}</b-td>
-                      <b-td>{{patternActivity.target}}</b-td>
-                      <b-td>{{patternActivity.alphaElement.name}}</b-td>
+                      <b-td v-bind:style="{backgroundColor: patternActivity.areaOfConcern.colorConvention}">
+                        {{ patternActivity.name }}
+                      </b-td>
+                      <b-td>{{ patternActivity.associationName }}</b-td>
+                      <b-td>{{ patternActivity.target }}</b-td>
+                      <b-td>{{ patternActivity.alphaElement.name }}</b-td>
                     </b-tr>
                     <b-tr v-for="patternActivity in getWorkProductPatterns" :key="patternActivity._id">
-                      <b-td v-bind:style="{backgroundColor: patternActivity.areaOfConcern.colorConvention}" >{{patternActivity.name}}</b-td>
-                      <b-td>{{patternActivity.associationName}}</b-td>
-                      <b-td>{{patternActivity.target}}</b-td>
+                      <b-td v-bind:style="{backgroundColor: patternActivity.areaOfConcern.colorConvention}">
+                        {{ patternActivity.name }}
+                      </b-td>
+                      <b-td>{{ patternActivity.associationName }}</b-td>
+                      <b-td>{{ patternActivity.target }}</b-td>
                       <b-td>
                         <b-list-group>
                           <b-list-group-item
                               v-for="pwp in patternActivity.workProductElements" :key="pwp._id">
-                            {{pwp.name}}
+                            {{ pwp.name }}
                           </b-list-group-item>
                         </b-list-group>
                       </b-td>
@@ -115,9 +126,9 @@
             <b-col>
               <b-form-group>
                 <b-form-input required
-                    :disabled="getPublicPracticeToValidate.finished"
-                    placeholder="Evaluator Name"
-                    v-model="getPublicPracticeToValidate.personName"></b-form-input>
+                              :disabled="getPublicPracticeToValidate.finished"
+                              placeholder="Evaluator Name"
+                              v-model="getPublicPracticeToValidate.personName"></b-form-input>
               </b-form-group>
               <b-form-group>
                 <b-form-input required type="email"
@@ -132,20 +143,22 @@
                     v-model="getPublicPracticeToValidate.comment"></b-form-textarea>
               </b-form-group>
               <b-form-group>
-                <p>Status: <strong>{{getPublicPracticeToValidate.finished ? 'Closed' : 'Open'}}</strong></p>
+                <p>Status: <strong>{{ getPublicPracticeToValidate.finished ? 'Closed' : 'Open' }}</strong></p>
               </b-form-group>
             </b-col>
             <b-col>
             </b-col>
           </b-form-row>
-          <b-form-group label="Criteria List" label-class="font-weight-bold bg-info p-3 text-center">
+          <b-form-group label="Criteria List" label-class="font-weight-bold p-3 text-center">
             <b-form-group
                 label-class="font-weight-bold bg-warning p-2" :id="criterion._id" :label="criterion.name"
-                v-for="criterion in getCriteria" :key="criterion._id" :description="criterion.description">
+                v-for="criterion in getCriteria" :key="criterion._id">
+              <p><strong>Objective: </strong> {{ criterion.objective }}</p>
               <b-form-group :description="variable.meaning"
                             label-class="font-weight-bold" label-cols="2" :label="variable.symbol"
                             v-for="variable in criterion.variables" :key="variable._id">
-                <b-form-input :disabled="getPublicPracticeToValidate.finished" required v-on:keypress="isNumber($event, variable.value)" type="number"
+                <b-form-input :disabled="getPublicPracticeToValidate.finished" required
+                              v-on:keypress="isNumber($event, variable.value)" type="number"
                               v-model="variable.value"></b-form-input>
               </b-form-group>
               <b-form-group label-class="font-weight-bold" label-cols="2"
@@ -157,9 +170,11 @@
           </b-form-group>
           <b-form-group>
             <b-button :disabled="getPublicPracticeToValidate.finished"
-                      class="ml-3 float-right" type="reset" variant="outline-dark">Clear</b-button>
+                      class="ml-3 float-right" type="reset" variant="outline-dark">Clear
+            </b-button>
             <b-button :disabled="getPublicPracticeToValidate.finished"
-                      class="float-right" type="submit" variant="outline-success">Save</b-button>
+                      class="float-right" type="submit" variant="outline-success">Save
+            </b-button>
           </b-form-group>
         </b-form>
       </b-tab>
@@ -204,27 +219,18 @@ export default {
     getCriteria() {
       return this.getPublicPracticeToValidate.criteria;
     },
-    getCriteriaToSave() {
-      return this.getPublicPracticeToValidate.criteria.map(e => {
-        return {
-          result: e.result,
-          name: e.name,
-          expression: e.expression,
-          variables: e.variables
-        }
-      });
-    },
     getAlertMessage() {
       return this.getInfoMessage !== '' ? this.getInfoMessage : this.getErrorMessage;
     }
   },
   methods: {
-    ...mapActions('validatePractice', ['findPublicPracticeValidationById', 'savePublicValidation']),
+    ...mapActions('validatePractice',
+        ['findPublicPracticeValidationById', 'savePublicPracticeValidationRequest', 'defaultPublicPracticeToValidate']),
     countDownChanged(dismissCountDown) {
       this.dismissCountDown = dismissCountDown
     },
     async onGetInformation() {
-      await this.findPublicPracticeValidationById(this.id);
+      await this.findPublicPracticeValidationById(this.id.trim());
       this.dismissCountDown = this.dismissSecs;
     },
     isNumber(event, variableValue) {
@@ -259,15 +265,15 @@ export default {
           });
       if (closeValidation) {
         const {personName, email, comment} = this.getPublicPracticeToValidate
-        console.log(this.getCriteriaToSave)
-        await this.savePublicValidation({
-          validationId: this.id,
+        await this.savePublicPracticeValidationRequest({validationId: this.id,
           personName, email, comment,
-          criteria: this.getCriteriaToSave
-        });
+          criteria: this.getPublicPracticeToValidate.criteria});
         this.dismissCountDown = this.dismissSecs;
       }
     }
+  },
+  mounted() {
+    this.defaultPublicPracticeToValidate();
   }
 }
 </script>

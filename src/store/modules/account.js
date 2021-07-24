@@ -37,7 +37,7 @@ const getters = {
 const actions = {
     async register({commit}, account){
         try {
-            console.log('trying to create an account...')
+            console.log('trying to newPracticeValidationCriterion an account...')
             await accountService.register(account);
             //console.log(data);
             commit('clearErrorMessage');

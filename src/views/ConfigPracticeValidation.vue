@@ -1,6 +1,8 @@
 <template>
   <b-container class="mb-5">
-    <h4>Config validation for practice: <strong>{{ getPractice.name }}</strong></h4>
+    <h4>Current practice: <strong>{{ getPractice.name }}</strong></h4>
+    <p class="text-info">Here you can create new practice criteria, new validation request
+      and download a simple report with finished validation requests</p>
     <b-tabs class="my-5" v-model="tabIndex" lazy @activate-tab="onTabSelectionChange">
       <b-tab title="Available Practices">
         <b-table-simple hover striped small bordered class="mt-3">
@@ -8,7 +10,7 @@
             <b-th>Name</b-th>
             <b-th>Objective</b-th>
             <b-th>Tags</b-th>
-            <b-th>Create Validation / Look</b-th>
+            <b-th>Create Validation Request / Visualize / Download</b-th>
           </b-thead>
           <b-tbody>
             <b-tr v-for="practice in getPractices" :key="practice._id">
@@ -16,15 +18,20 @@
               <b-td>{{ practice.objective }}</b-td>
               <b-td>{{ practice.tags }}</b-td>
               <b-td class="text-center">
-                <b-button v-b-tooltip.hover title="Click to create a new public validation"
+                <b-button v-b-tooltip.hover title="Click to create a new public validation request"
                           squared size="sm"
                           @click="onCreateValidation(practice)" variant="success">
                   <b-icon-check-circle></b-icon-check-circle>
                 </b-button>
                 <b-button @click="onVisualizePracticeValidation(practice)"
-                          v-b-tooltip.hover title="Click to visualize practice criteria and validations"
+                          v-b-tooltip.hover title="Click to visualize practice criteria and validation requests"
                           class="ml-3" variant="info" squared size="sm">
                   <b-icon-eye></b-icon-eye>
+                </b-button>
+                <b-button @click="onDownloadReport(practice._id)"
+                          v-b-tooltip.hover title="Click to download report"
+                          class="ml-3" squared size="sm">
+                  <b-icon-download></b-icon-download>
                 </b-button>
               </b-td>
             </b-tr>
@@ -33,13 +40,19 @@
       </b-tab>
       <b-tab title="Practice Criteria">
         <b-form @submit.prevent="onSaveCriterion" @reset.prevent="clearCriterion" class="mt-5">
-          <b-form-group>
-            <b-form-input v-model="criterion.name" placeholder="Criterion Name"></b-form-input>
-          </b-form-group>
-          <b-form-group>
-            <b-form-textarea v-model="criterion.description" rows="3"
-                             placeholder="Criterion Objective"></b-form-textarea>
-          </b-form-group>
+          <b-form-row>
+            <b-col>
+              <b-form-group>
+                <b-form-input size="sm" v-model="criterion.name" placeholder="Criterion Name"></b-form-input>
+              </b-form-group>
+            </b-col>
+            <b-col>
+              <b-form-group>
+                <b-form-textarea size="sm" v-model="criterion.description" rows="4"
+                                 placeholder="Criterion Objective"></b-form-textarea>
+              </b-form-group>
+            </b-col>
+          </b-form-row>
           <b-form-group label="Variables" label-class="font-weight-bold">
             <b-form-group v-for="variable in criterion.variables" :key="variable.index" class="border border-info p-3">
               <b-form-group>
@@ -73,7 +86,7 @@
             <div style="margin-bottom: 15px"></div>
           </b-form-group>
         </b-form>
-        <b-form-group class="border border-info p-3">
+        <b-form-group>
           <b-table-simple small striped hover responsive="sm" class="mt-5">
             <b-thead head-variant="dark">
               <b-tr>
@@ -97,9 +110,8 @@
             </b-tbody>
           </b-table-simple>
         </b-form-group>
-
       </b-tab>
-      <b-tab title="Created Validations">
+      <b-tab title="Created Validation Requests">
         <b-table-simple small striped hover responsive="xs" class="mt-5">
           <b-thead head-variant="dark">
             <b-tr>
@@ -114,45 +126,44 @@
             </b-tr>
           </b-thead>
           <b-tbody>
-            <b-tr v-for="result in getAllPublicValidation" :key="result._id">
+            <b-tr v-for="validationRequest in getAllPublicValidation" :key="validationRequest._id">
               <b-td>
-                <b-button @click="onGetLink(result._id)" size="sm" squared variant="success">
+                <b-button @click="onGetLink(validationRequest._id)" size="sm" squared variant="success">
                   <b-icon-link></b-icon-link>
                 </b-button>
               </b-td>
-              <b-td>{{ result.practice.name }}</b-td>
-              <b-td>{{ result.personName }}</b-td>
-              <b-td>{{ result.email }}</b-td>
-              <b-td>{{ result.finished ? 'Yes' : 'No' }}</b-td>
-              <b-td>{{ result.comment }}</b-td>
+              <b-td>{{ validationRequest.practice.name }}</b-td>
+              <b-td>{{ validationRequest.personName }}</b-td>
+              <b-td>{{ validationRequest.email }}</b-td>
+              <b-td>{{ validationRequest.finished ? 'Yes' : 'No' }}</b-td>
+              <b-td>{{ validationRequest.comment }}</b-td>
               <b-td>
                 <b-list-group>
                   <b-list-group-item
                       class="d-flex justify-content-between align-items-center"
-                      v-for="criterion in result.criteria" :key="criterion._id">
+                      v-for="criterion in validationRequest.criteria" :key="criterion._id">
                     {{ criterion.name }}
-                    <b-badge variant="info" pill>{{ criterion.result }}</b-badge>
+                    <b-badge variant="info" pill>{{ criterion.result | number('0.000') }}</b-badge>
                   </b-list-group-item>
                 </b-list-group>
               </b-td>
               <b-td>
-                <b-button :disabled="result.finished" variant="danger" squared size="sm">
+                <b-button @click="onRemovePublicValidationRequest(validationRequest._id)" :disabled="validationRequest.finished" variant="danger" squared size="sm">
                   <b-icon-trash></b-icon-trash>
                 </b-button>
               </b-td>
             </b-tr>
-
           </b-tbody>
         </b-table-simple>
       </b-tab>
     </b-tabs>
-
   </b-container>
 </template>
 
 <script>
 import {mapActions, mapGetters} from "vuex";
 import {applicationPaths} from '@/utils/commons'
+
 export default {
   name: "ConfigPracticeValidation",
   data() {
@@ -172,8 +183,7 @@ export default {
   },
   computed: {
     ...mapGetters('validatePractice',
-        ['getPractice', 'getPractices', 'getAllValidationCriteria',
-          'getAllPracticeValidationSummary', 'getAllPublicValidation']),
+        ['getPractice', 'getPractices', 'getAllValidationCriteria', 'getAllPublicValidation']),
     getAppURL() {
       return applicationPaths.application;
     },
@@ -182,30 +192,24 @@ export default {
     }
   },
   methods: {
-    ...mapActions('validatePractice', ['fetchAvailablePractices',
-      'setPracticeToEdit', 'fetchAllPracticeValidationCriteria',
-      'removePracticeValidationCriterion', 'create',
-      'savePracticeValidationResult', 'fetchAllValidationCriteriaSummary',
-      'removeValidationsFromCriterion', 'clearConfigValidationData',
-      'createPublicPracticeValidation', 'fetchAllPublicPracticeValidations']),
+    ...mapActions('validatePractice', ['fetchAllAvailablePractices',
+      'setPracticeToEdit', 'fetchAllPracticeValidationCriteria', 'removePracticeValidationCriterion',
+      'newPracticeValidationCriterion', 'clearPracticeValidationConfigData', 'createPublicPracticeValidation',
+      'fetchAllPublicPracticeValidationRequests', 'getPracticeValidationRequestReport',
+      'removePublicPracticeValidationRequest']),
     async onCreateValidation(practice) {
-      this.clearConfigValidationData();
-      this.setPracticeToEdit(practice);
+      await this.clearPracticeValidationConfigData();
+      await this.setPracticeToEdit(practice);
       this.criterion.owner = practice._id;
       await this.fetchAllPracticeValidationCriteria(this.criterion.owner);
-      await this.fetchAllPublicPracticeValidations();
-      console.log(this.getAllValidationCriteria.length);
       if (this.getAllValidationCriteria.length > 0) {
-        console.log('creation public validation');
         let data = this.getAllValidationCriteria.map(e => {
-          const {name, objective, expression, variables} = e;
+          const {name, description, expression, variables} = e;
           return {
-            name, objective, expression, variables
+            name, objective: description, expression, variables
           }
         })
-        await this.createPublicPracticeValidation({
-          criteria: data
-        });
+        await this.createPublicPracticeValidation({criteria: data});
         this.tabIndex = 2;
       } else {
         alert('Selected practice does not have any validation criteria.')
@@ -228,7 +232,7 @@ export default {
     async onSaveCriterion() {
       if (this.getPractice._id !== '') {
         this.criterion.owner = this.getPractice._id;
-        await this.create(this.criterion);
+        await this.newPracticeValidationCriterion(this.criterion);
         this.clearCriterion();
       }
     },
@@ -248,52 +252,48 @@ export default {
         expression: ''
       }
     },
-    async onSaveValidationResults() {
-      const dataToSend = this.getAllValidationCriteria.map(e => {
-        return {
-          criterionId: e._id,
-          variables: e.variables,
-          result: e.result
-        }
-      });
-      await this.savePracticeValidationResult({
-        criteria: dataToSend
-      });
-
-      this.getAllValidationCriteria.forEach(criteria => {
-        criteria.variables.forEach(v => {
-          v.value = 1;
-        })
-      })
-    },
-
     async onTabSelectionChange(newTabIndex) {
-      if ((newTabIndex === 3 || newTabIndex === 2) && this.getPractice._id !== '') {
-        await this.fetchAllValidationCriteriaSummary(this.getPractice._id);
+      if (newTabIndex === 2 && this.getPractice._id !== '') {
+        await this.fetchAllPublicPracticeValidationRequests();
+      }
+      if (newTabIndex === 0) {
+        await this.fetchAllAvailablePractices();
       }
     },
-
-    async onRemoveValidations(criterionId) {
-      if (criterionId) {
-        console.log('Removing criterion validations... ' + criterionId)
-        await this.removeValidationsFromCriterion(criterionId);
+    async onRemovePublicValidationRequest(validationRequestId) {
+      if (validationRequestId) {
+        await this.removePublicPracticeValidationRequest(validationRequestId);
       }
     },
     onGetLink(publicValidationId) {
-      alert(`Link to validate practice: \n ${this.getAppURL}/#${this.getPublicResource} ${publicValidationId}`)
+      this.$bvModal.msgBoxOk(
+          `${this.getAppURL}/#${this.getPublicResource}${publicValidationId}`,
+          {
+            title: 'Information',
+            size: 'lg',
+            buttonSize: 'sm',
+            okVariant: 'success',
+            headerClass: 'p-2 border-bottom-0',
+            footerClass: 'p-2 border-top-0',
+            centered: false
+          })
+          .then(() => {
+          })
     },
     onVisualizePracticeValidation(practice) {
-      this.clearConfigValidationData();
+      this.clearPracticeValidationConfigData();
       this.setPracticeToEdit(practice);
       this.criterion.owner = practice._id;
       this.fetchAllPracticeValidationCriteria(this.criterion.owner);
-      this.fetchAllPublicPracticeValidations();
+      this.fetchAllPublicPracticeValidationRequests();
       this.tabIndex = 2;
+    },
+    async onDownloadReport(practiceId) {
+      await this.getPracticeValidationRequestReport(practiceId);
     }
-
   },
   mounted() {
-    this.fetchAvailablePractices();
+    this.fetchAllAvailablePractices();
   }
 }
 </script>

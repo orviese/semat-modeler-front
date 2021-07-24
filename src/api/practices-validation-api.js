@@ -29,7 +29,7 @@ export default {
             headers
         })
     },
-    fetchAllPractices() {
+    getAllAvailablePractices() {
         return this.execute('get', '/practices', null, {});
     },
     createPracticeValidationCriterion(criterionData){
@@ -53,13 +53,25 @@ export default {
     createNewPublicPracticeValidation(practice, data) {
         return this.execute('post', `/practice-validations/${practice}/public`, data, {});
     },
-    getAllPublicPracticeValidation(practice) {
+    getAllPublicPracticeValidationRequests(practice) {
         return this.execute('get', `/practice-validations/${practice}/public`, null, {});
     },
     getPublicPracticeValidation(validationId) {
         return this.execute('get', `/practice-validations/public/${validationId}`, null, {});
     },
     saveAndClosePublicPracticeValidation(validationId, data) {
-        return this.execute('put', `/practice-validations/public/${validationId}`, data, {});
+        return this.execute('patch', `/practice-validations/public/${validationId}`, data, {});
+    },
+    getPublicPracticeValidationReport(practiceId) {
+       return axios({
+            url: `${process.env.VUE_APP_SEMAT_API_ENDPOINT}/practice-validations/report/${practiceId}`,
+            method: 'GET',
+            responseType: 'blob',
+            withCredentials: true
+        })
+    },
+    deletePracticeValidationRequest(validationRequestId) {
+        return this.execute('delete', `/practice-validations/validation-request/${validationRequestId}`,
+            null, {});
     }
 }

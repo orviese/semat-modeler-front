@@ -72,7 +72,7 @@ const getters = {
 const actions = {
     async create({commit, rootState}, practice) {
         try {
-            console.log('trying to create a practice...', practice);
+            console.log('trying to newPracticeValidationCriterion a practice...', practice);
             let practiceCreated = await practiceService.createPractice(practice);
             commit('refreshPractice', practiceCreated.data);
             commit('setInfoMessage', 'Practice created.');
