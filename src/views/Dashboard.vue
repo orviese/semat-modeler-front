@@ -8,7 +8,7 @@
         the  practice, you would be able to create validation request to let volunteers evaluate your practice
         using defined validation criteria.
       </p>
-      <b-button v-if="isLogged" to="/model-practices">Model your first practice</b-button>
+      <b-button variant="link" to="/model-practices" v-if="isLogged">Model your first practice</b-button>
     </b-jumbotron>
   </b-container>
 </template>
@@ -36,11 +36,4 @@ export default {
 </script>
 
 <style scoped>
-#dashboard-parent {
-  padding-left: 255px;
-  transition: 0.3s ease;
-}
-#dashboard-parent.collapsed {
-  padding-left: 55px;
-}
 </style>
