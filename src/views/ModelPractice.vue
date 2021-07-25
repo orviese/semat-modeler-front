@@ -556,6 +556,7 @@ export default {
       }
       if (newTabIndex === 5) {
         this.activitySpaceSelected = null;
+        this.fetchAllActivitySpaces();
       }
       if (newTabIndex === 6) {
         this.fetchAllPracticePatterns();
@@ -570,7 +571,6 @@ export default {
     async addAlphaToPractice() {
       if (this.tabIndex === 2 && this.alphaPracticeSelected !== null) {
         //let alpha = this.getPracticeAlphas.find(e => e._id === this.alphaPracticeSelected);
-        console.log('Alpha to add .... ' + JSON.stringify(this.alphaPracticeSelected));
         //if (!alpha.isKernel) {
         await this.addAlphaPractice(this.alphaPracticeSelected);
         //}

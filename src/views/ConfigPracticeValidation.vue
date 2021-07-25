@@ -43,12 +43,12 @@
           <b-form-row>
             <b-col>
               <b-form-group>
-                <b-form-input size="sm" v-model="criterion.name" placeholder="Criterion Name"></b-form-input>
+                <b-form-input required size="sm" v-model="criterion.name" placeholder="Criterion Name"></b-form-input>
               </b-form-group>
             </b-col>
             <b-col>
               <b-form-group>
-                <b-form-textarea size="sm" v-model="criterion.description" rows="4"
+                <b-form-textarea required size="sm" v-model="criterion.description" rows="4"
                                  placeholder="Criterion Objective"></b-form-textarea>
               </b-form-group>
             </b-col>
@@ -56,10 +56,10 @@
           <b-form-group label="Variables" label-class="font-weight-bold">
             <b-form-group v-for="variable in criterion.variables" :key="variable.index" class="border border-info p-3">
               <b-form-group>
-                <b-form-input v-model="variable.meaning" size="sm" placeholder="Variable Meaning"></b-form-input>
+                <b-form-input required v-model="variable.meaning" size="sm" placeholder="Variable Meaning"></b-form-input>
               </b-form-group>
               <b-form-group>
-                <b-form-input v-model="variable.symbol" :formatter="toUpperCase" size="sm"
+                <b-form-input required v-model="variable.symbol" :formatter="toUpperCase" size="sm"
                               placeholder="Variable Symbol"></b-form-input>
               </b-form-group>
             </b-form-group>
@@ -76,7 +76,7 @@
               description="Formula expression to be evaluated. Use these SUM[+] SUB[-] MUL[*] DIV[/] Exp[**] Parenthesis ( ) arithmetic and grouping symbols only."
               label-class="font-weight-bold">
             <b-form-group>
-              <b-form-input v-model="criterion.expression" :formatter="toUpperCase"
+              <b-form-input required v-model="criterion.expression" :formatter="toUpperCase"
                             placeholder="Expression"></b-form-input>
             </b-form-group>
           </b-form-group>
@@ -220,7 +220,8 @@ export default {
       this.criterion.variables.push({
         index: this.criterion.variables.length,
         symbol: '',
-        meaning: ''
+        meaning: '',
+        value: 1
       })
     },
     onRemoveVariable() {
@@ -232,8 +233,22 @@ export default {
     async onSaveCriterion() {
       if (this.getPractice._id !== '') {
         this.criterion.owner = this.getPractice._id;
-        await this.newPracticeValidationCriterion(this.criterion);
-        this.clearCriterion();
+        let expressionOk = true;
+        let expressionWithoutOperator = this.criterion.expression.replace(/[^a-zA-Z]/mg,'');
+        console.log(expressionWithoutOperator)
+        for (let i = 0; i < expressionWithoutOperator.length; i++) {
+          let result = this.criterion.variables.filter(e => expressionWithoutOperator.charAt(i) === e.symbol);
+          if (result.length === 0){
+            expressionOk = false;
+            break;
+          }
+        }
+        if (expressionOk){
+          await this.newPracticeValidationCriterion(this.criterion);
+          this.clearCriterion();
+        }else {
+          alert(`Some variable symbols present in the expression were not defined in variable list`)
+        }
       }
     },
     onDeleteCriterion(criterion) {

@@ -20,7 +20,6 @@
         <b-icon icon="person"></b-icon>
         Sign In
       </b-button>
-      {{ getAccount }}
     </b-form>
   </b-col>
 </template>

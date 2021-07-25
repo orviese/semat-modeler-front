@@ -80,7 +80,6 @@ const routes = [
         meta: {secure: true},
       },
       {
-        //http://localhost:8080/#/validate-practices/public/60fa02642c5ef33459235f4d
         path: '/validate-practices/public/:id',
         name: 'PublicPracticeValidation',
         component: PublicPracticeValidation,

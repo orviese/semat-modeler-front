@@ -1,78 +1,31 @@
 <template>
   <b-container>
-    <h2>Available Practices</h2>
+    <b-jumbotron header="SEMOVA" lead="SEMAT Modeler Validator">
+      <p class="text-justify" >This is a prototype functional application for academic purpose that allows modeling software
+        development practices using the basic SEMAT elements defined in the ESSENCE spec.
+      </p>
+      <p class="text-justify">Once your software development practice contains the minimal elements that represent in a textual way
+        the  practice, you would be able to create validation request to let volunteers evaluate your practice
+        using defined validation criteria.
+      </p>
+      <b-button v-if="isLogged" to="/model-practices">Model your first practice</b-button>
+    </b-jumbotron>
   </b-container>
-  <!--
-    <b-col id="dashboard-parent" :class="[{'collapsed' : collapse}]">
-      <div class="dashboard-container">
-        <router-view></router-view>
-      </div>
-      <sidebar-menu class="mt-5" :menu="menu" :theme="theme" width="250px" @toggle-collapse="onToggleCollapse">
-        <template #toggle-icon>
-          <i class="fas fa-bars"></i>
-        </template>
-      </sidebar-menu>
-    </b-col> -->
 </template>
 
 <script>
+
+import {mapGetters} from "vuex";
 
 export default {
   name: "Dashboard",
   data() {
     return {
-      menu: [
-        {
-          header: true,
-          title: 'SEMOVA',
-          hiddenOnCollapse: true
-        },
-        {
-          href: '/profile',
-          title: 'Dashboard',
-          icon: 'fa fa-user'
-        },
-        {
-          title: 'Kernel',
-          icon: 'fa fa-cog',
-          child: [
-            {
-              href: '/areas-of-concern',
-              title: 'Areas Of Concern',
-              icon: 'fa fa-graduation-cap'
-            },
-            {
-              href: '',
-              title: 'Alphas',
-              icon: 'fa fa-spinner'
-            },
-            {
-              href: '',
-              title: 'Activity Spaces',
-              icon: 'fa fa-bars'
-            }
-          ]
-        },
-        {
-          title: 'Practices',
-          icon: 'fa fa-object-group',
-          child: [
-            {
-              href: '/hello',
-              title: 'Build'
-            },
-            {
-              href: '/about',
-              title: 'Validate'
-            }
-          ]
-        }
-      ],
-      theme: 'white-theme',
-      width: '250px',
-      relative: true,
-      collapse: false
+
     }
+  },
+  computed: {
+    ...mapGetters('account', ['isLogged'])
   },
   methods: {
     onToggleCollapse(collapse){

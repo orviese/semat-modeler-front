@@ -42,12 +42,11 @@ export default {
           title: (this.isLogged ? this.getAccount.name : 'Menu navigation'),
           hiddenOnCollapse: true
         },
-       /* {
+        {
           href: '/dashboard',
           title: 'Dashboard',
-          icon: 'fa fa-archive',
-          hidden: !this.isLogged
-        },*/
+          icon: 'fa fa-archive'
+        },
         {
           title: 'Kernel',
           icon: 'fa fa-cog',
