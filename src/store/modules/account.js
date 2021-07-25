@@ -37,9 +37,7 @@ const getters = {
 const actions = {
     async register({commit}, account){
         try {
-            console.log('trying to newPracticeValidationCriterion an account...')
             await accountService.register(account);
-            //console.log(data);
             commit('clearErrorMessage');
             await router.push('/signin');
         }catch (e){
@@ -53,13 +51,10 @@ const actions = {
     },
     async signIn({commit}, data){
         try {
-            console.log(`trying to sign in... ${data.email}`);
             let response = await accountService.signIn(data);
             commit('setAccount', response.data);
             commit('setLoggedIn', true);
             commit('clearErrorMessage');
-            //console.log(response.headers);
-            //console.log(response.data);
             await router.push('/dashboard');
         }catch (e) {
             if (e.response !== null){
@@ -109,26 +104,16 @@ const mutations = {
     setLoggedIn(state, payload){
         state.isLogged = payload;
         if (!payload){
-            state.account = state.accountDefault;
-            /*
-            this.replaceState({
-                account: {
-                    account: state.accountDefault,
-                    isLogged: false
-                },
-
-                practice: {
-                    practice: practice.defaultPractice,
-                    practices: []
-                },
-                areaOfConcern: {
-                    areasOfConcern: [],
-                    areaOfConcern: areaOfConcern.defaultAreaOfConcern
-                }
-            });*/
+            state.account = {
+                id: '',
+                name: '',
+                email: '',
+                password: '',
+                newPassword: '',
+                status: ''
+            };
         }
-    },
-
+    }
 }
 
 export default {
